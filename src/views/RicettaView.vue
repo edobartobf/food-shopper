@@ -101,7 +101,7 @@ async function elimina() {
 
     <div class="tenue">
       <template v-if="ricetta.tempo_minuti">{{ ricetta.tempo_minuti }} min · </template>
-      {{ NOMI_FONTE[ricetta.fonte.tipo] ?? ricetta.fonte.tipo }}
+      {{ NOMI_FONTE[ricetta.fonte.tipo] ?? ricetta.fonte.tipo }}<template v-if="ricetta.fonte.autore"> di {{ ricetta.fonte.autore }}</template>
       <template v-if="ricetta.creata_da"> · aggiunta da {{ ricetta.creata_da }}</template>
     </div>
     <div v-if="ricetta.tag.length" class="mini-tag" style="margin-top: 8px">

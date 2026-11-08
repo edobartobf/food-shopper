@@ -1,0 +1,5 @@
+anthropic==2.6.0
+pydantic>=2.9,<3
+pillow>=11
+# yt-dlp va aggiornato spesso perché Instagram cambia: la Action installa sempre l'ultima versione
+yt-dlp

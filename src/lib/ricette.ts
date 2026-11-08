@@ -23,7 +23,7 @@ export interface Ricetta {
   tag: string[]
   ingredienti: Ingrediente[]
   passaggi: string[]
-  fonte: { tipo: string; url?: string }
+  fonte: { tipo: string; url?: string; url_condiviso?: string; autore?: string }
   immagine_url?: string | null
   note?: string
   da_ricontrollare: boolean
@@ -238,7 +238,7 @@ export function urlConfrontabile(url: string): string {
     const u = new URL(url.trim())
     u.hash = ''
     for (const p of [...u.searchParams.keys()]) {
-      if (/^(utm_|igsh|igshid|si$|_r$|_t$|is_from_webapp|sender_device|fbclid|gclid|share)/i.test(p)) u.searchParams.delete(p)
+      if (/^(utm_|igsh|igshid|si$|_r$|_t$|is_from_webapp|sender_device|fbclid|gclid|share|exln|obrf)/i.test(p)) u.searchParams.delete(p)
     }
     u.hostname = u.hostname.replace(/^(www|m)\./, '')
     return `${u.hostname}${u.pathname.replace(/\/+$/, '')}${u.search}`.toLowerCase()
@@ -250,7 +250,7 @@ export function urlConfrontabile(url: string): string {
 export function trovaPerUrl(ricette: Ricetta[], url: string): Ricetta | undefined {
   if (!url.trim()) return undefined
   const cercato = urlConfrontabile(url)
-  return ricette.find((r) => r.fonte.url && urlConfrontabile(r.fonte.url) === cercato)
+  return ricette.find((r) => [r.fonte.url, r.fonte.url_condiviso].some((u) => u && urlConfrontabile(u) === cercato))
 }
 
 export function formattaQuantita(i: Ingrediente, fattore = 1): string {

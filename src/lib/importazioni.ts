@@ -1,5 +1,5 @@
 // Richieste di import: l'app le scrive in importazioni/, la Action del repo dati le trasforma in ricette.
-import { bytesInBase64, elencaCartella, leggiJson, scriviFile, scriviJson } from './github'
+import { bytesInBase64, elencaCartella, eliminaFile, leggiJson, scriviFile, scriviJson } from './github'
 import { impostazioni } from './impostazioni'
 import { nuovoId, tipoFonte, type ImmagineCondivisa, type TipoFonte } from './condivisi'
 
@@ -13,6 +13,8 @@ export interface Importazione {
   creata_da: string
   creata_il: string
   errore: string | null
+  /** se la ricetta c'era già */
+  ricetta_id?: string | null
 }
 
 const ESTENSIONI: Record<string, string> = { 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' }
@@ -48,4 +50,26 @@ export async function elencaImportazioni(): Promise<Importazione[]> {
     .filter((f): f is NonNullable<typeof f> => f !== null)
     .map((f) => f.dati)
     .sort((a, b) => b.creata_il.localeCompare(a.creata_il))
+}
+
+/** Rimette in coda una richiesta non riuscita: la Action riparte. */
+export async function riprovaImportazione(imp: Importazione): Promise<void> {
+  const file = await leggiJson<Importazione>(`importazioni/${imp.id}.json`)
+  if (!file) return
+  await scriviJson(
+    `importazioni/${imp.id}.json`,
+    { ...file.dati, stato: 'in_attesa', errore: null, ricetta_id: null },
+    `Riprova import ${imp.url || imp.fonte}`,
+    file.sha,
+  )
+}
+
+/** Toglie una richiesta (e i suoi screenshot) dall'elenco. */
+export async function togliImportazione(imp: Importazione): Promise<void> {
+  for (const a of imp.allegati) {
+    const voce = (await elencaCartella('allegati')).find((v) => v.path === a)
+    if (voce) await eliminaFile(voce.path, voce.sha, `Togli screenshot di ${imp.id}`)
+  }
+  const file = await leggiJson<Importazione>(`importazioni/${imp.id}.json`)
+  if (file) await eliminaFile(`importazioni/${imp.id}.json`, file.sha, `Togli import ${imp.url || imp.fonte}`)
 }

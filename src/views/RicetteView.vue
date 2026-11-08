@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
-import { elencaImportazioni, type Importazione } from '../lib/importazioni'
+import { elencaImportazioni, riprovaImportazione, togliImportazione, type Importazione } from '../lib/importazioni'
 import { aggiornaRicettario, filtraRicette, ricettario, tuttiITag } from '../lib/ricette'
 
 const route = useRoute()
@@ -30,6 +30,29 @@ async function caricaImportazioni() {
   }
   clearTimeout(timer)
   if (importazioni.value.some((i) => i.stato !== 'errore')) timer = window.setTimeout(caricaImportazioni, 15000)
+}
+
+const inLavoro = ref<string | null>(null)
+
+async function agisci(imp: Importazione, azione: 'riprova' | 'togli') {
+  inLavoro.value = imp.id
+  erroreImport.value = ''
+  try {
+    if (azione === 'riprova') {
+      await riprovaImportazione(imp)
+      imp.stato = 'in_attesa'
+      imp.errore = null
+      clearTimeout(timer)
+      timer = window.setTimeout(caricaImportazioni, 15000)
+    } else {
+      await togliImportazione(imp)
+      importazioni.value = importazioni.value.filter((i) => i.id !== imp.id)
+    }
+  } catch (e) {
+    erroreImport.value = e instanceof Error ? e.message : String(e)
+  } finally {
+    inLavoro.value = null
+  }
 }
 
 function scegliTag(t: string) {
@@ -67,7 +90,15 @@ const data = (iso: string) =>
         </span>
         · {{ imp.creata_da }} · {{ data(imp.creata_il) }}
       </div>
-      <div v-if="imp.errore" class="messaggio errore">{{ imp.errore }}</div>
+      <div v-if="imp.errore" class="messaggio errore">
+        {{ imp.errore }}
+        <RouterLink v-if="imp.ricetta_id" :to="`/ricette/${imp.ricetta_id}`"> Apri la ricetta</RouterLink>
+      </div>
+      <div v-if="imp.stato === 'errore'" class="azioni" style="margin-top: 8px">
+        <button v-if="!imp.ricetta_id" class="secondario" :disabled="inLavoro === imp.id" @click="agisci(imp, 'riprova')">Riprova</button>
+        <RouterLink v-if="!imp.ricetta_id && !imp.url" to="/importa" class="pulsante-link secondario">Importa a mano</RouterLink>
+        <button class="secondario" :disabled="inLavoro === imp.id" @click="agisci(imp, 'togli')">Togli</button>
+      </div>
     </div>
   </template>
 
