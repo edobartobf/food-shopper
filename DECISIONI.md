@@ -57,8 +57,10 @@ e da cui si genera la lista della spesa condivisa. Decisioni prese l'8/11/2026.
   l'etichetta "da ricontrollare" finché uno dei due non le conferma.
 - **Import dal menu Condividi**: link, testo, screenshot.
   - Siti: dati strutturati schema.org `Recipe` dalla pagina; l'AI solo se mancano.
-  - TikTok: didascalia e sottotitoli automatici con `yt-dlp`, poi l'AI.
-  - Instagram: senza login né cookie. Se Instagram blocca, l'app propone di incollare la didascalia o condividere uno screenshot.
+  - TikTok: didascalia e sottotitoli automatici del parlato letti dalla pagina pubblica del video (`yt-dlp` chiede
+    il login, la pagina no), poi l'AI. I sottotitoli coprono anche molte ricette "solo parlate".
+  - Instagram: didascalia con `yt-dlp`, senza login né cookie (a novembre 2026 funziona anche dai server di GitHub).
+    Se Instagram blocca, la richiesta va in errore e l'app propone di riprovare o di incollare testo o screenshot.
   - Un link già importato apre la ricetta esistente.
 - **Ingredienti normalizzati all'import**: tutto in italiano (anche da fonti in inglese), link originale conservato,
   unità metriche (g, ml, pz, cucchiaio, cucchiaino), nessuna conversione tra unità diverse ("200 g + 2 cucchiai"),
@@ -67,8 +69,15 @@ e da cui si genera la lista della spesa condivisa. Decisioni prese l'8/11/2026.
   Voci libere, modifica, spunta, "Svuota spuntati". Funziona offline. Si condivide come testo (es. WhatsApp).
 - Nessuna notifica a import finito: la ricetta compare "in elaborazione" e si completa da sola.
 
+## Importatore
+Il codice sta in questo repo, cartella `importatore/` (Python: `fonti.py` raccoglie il materiale, `estrazione.py`
+chiama Claude Haiku 5.5 con output strutturato e corregge i risultati, `importa.py` elabora le richieste).
+La Action `importa.yml` del repo dati lo scarica a ogni esecuzione e lo lancia con la chiave Anthropic.
+Le ricette importate restano "da ricontrollare" finché uno dei due non le conferma.
+Doppioni: si confronta il link condiviso e quello canonico (i link brevi di TikTok cambiano a ogni condivisione).
+
 ## Rimandato
-Ricette solo parlate (Whisper), testo in sovrimpressione nei video, dispensa, pianificazione dei pasti,
+Ricette solo parlate senza sottotitoli (Whisper), testo in sovrimpressione nei video, dispensa, pianificazione dei pasti,
 foto ospitate da voi, notifiche (con l'APK), liste multiple, valori nutrizionali.
 
 ## Tappe
