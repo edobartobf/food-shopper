@@ -146,4 +146,7 @@ def pulisci(r: RicettaEstratta, reparti: list[str]) -> None:
             i.quantita = None
         if i.qb or i.quantita is None:
             i.qb, i.quantita, i.unita = True, None, None
-    r.tag = list(dict.fromkeys(t.strip().lower() for t in r.tag if t.strip()))[:4]
+    r.tag = list(dict.fromkeys(t.strip().lower() for t in r.tag if t.strip()))
+    if r.tempo_minuti and r.tempo_minuti > 30 and "veloce" in r.tag:
+        r.tag.remove("veloce")
+    r.tag = r.tag[:4]

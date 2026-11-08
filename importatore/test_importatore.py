@@ -128,7 +128,7 @@ def test_pulisci_acqua_pizzico_tag():
     from estrazione import Ingrediente, RicettaEstratta, pulisci
 
     r = RicettaEstratta(
-        e_una_ricetta=True, motivo=None, titolo="x", porzioni=2, tempo_minuti=None, tag=["Primi", "primi", "veloce"], passaggi=[], note=None,
+        e_una_ricetta=True, motivo=None, titolo="x", porzioni=2, tempo_minuti=20, tag=["Primi", "primi", "veloce"], passaggi=[], note=None,
         ingredienti=[
             Ingrediente(nome="Acqua", quantita=0.5, unita="tazza", reparto="casa e igiene", qb=False, nota=None),
             Ingrediente(nome="sale", quantita=None, unita="pizzico", reparto="dispensa", qb=False, nota=None),
@@ -140,3 +140,12 @@ def test_pulisci_acqua_pizzico_tag():
     assert (r.ingredienti[0].qb, r.ingredienti[0].quantita, r.ingredienti[0].unita, r.ingredienti[0].nota) == (True, None, None, "un pizzico")
     assert r.ingredienti[1].reparto == "altro"
     assert r.tag == ["primi", "veloce"]
+
+
+def test_veloce_solo_sotto_30_minuti():
+    pytest.importorskip("anthropic")
+    from estrazione import RicettaEstratta, pulisci
+
+    r = RicettaEstratta(e_una_ricetta=True, motivo=None, titolo="x", porzioni=2, tempo_minuti=40, tag=["piatti unici", "veloce"], passaggi=[], note=None, ingredienti=[])
+    pulisci(r, ["altro"])
+    assert r.tag == ["piatti unici"]
