@@ -140,6 +140,12 @@ def main(repo: Path) -> int:
             riepilogo.append(f"Import non riuscito: {imp.get('url') or file.stem} ({messaggio[:80]})")
             print(f"  ✗ {messaggio}")
 
+    riuscite = sum(r.startswith("Importata") for r in riepilogo)
+    if len(riepilogo) > 1:
+        titolo = f"Import: {riuscite} {'ricetta importata' if riuscite == 1 else 'ricette importate'}"
+        if len(riepilogo) - riuscite:
+            titolo += f", {len(riepilogo) - riuscite} non riuscit{'o' if len(riepilogo) - riuscite == 1 else 'i'}"
+        riepilogo.insert(0, titolo)
     Path(os.environ.get("RISULTATO", repo / "risultato.txt")).write_text("\n".join(riepilogo) or "Nessuna importazione in attesa", encoding="utf-8")
     return 0
 

@@ -121,3 +121,22 @@ def test_salta_richieste_gia_in_errore(repo):
     richiesta(cartella, "imp-4", stato="errore", errore="vecchio")
     importa.main(cartella)
     assert (cartella / "risultato.txt").read_text() == "Nessuna importazione in attesa"
+
+
+def test_pulisci_acqua_pizzico_tag():
+    pytest.importorskip("anthropic")
+    from estrazione import Ingrediente, RicettaEstratta, pulisci
+
+    r = RicettaEstratta(
+        e_una_ricetta=True, motivo=None, titolo="x", porzioni=2, tempo_minuti=None, tag=["Primi", "primi", "veloce"], passaggi=[], note=None,
+        ingredienti=[
+            Ingrediente(nome="Acqua", quantita=0.5, unita="tazza", reparto="casa e igiene", qb=False, nota=None),
+            Ingrediente(nome="sale", quantita=None, unita="pizzico", reparto="dispensa", qb=False, nota=None),
+            Ingrediente(nome="riso", quantita=200, unita="g", reparto="inventato", qb=False, nota=None),
+        ],
+    )
+    pulisci(r, ["dispensa", "altro"])
+    assert [i.nome for i in r.ingredienti] == ["sale", "riso"]
+    assert (r.ingredienti[0].qb, r.ingredienti[0].quantita, r.ingredienti[0].unita, r.ingredienti[0].nota) == (True, None, None, "un pizzico")
+    assert r.ingredienti[1].reparto == "altro"
+    assert r.tag == ["primi", "veloce"]

@@ -141,7 +141,8 @@ def da_instagram(url: str) -> Materiale:
         with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True, "skip_download": True}) as ydl:
             info = ydl.extract_info(canonico, download=False) or {}
         descrizione = (info.get("description") or "").strip()
-        autore = info.get("uploader_id") or info.get("channel") or info.get("uploader") or ""
+        # channel è il nome utente (@…), uploader il nome esteso, uploader_id un numero
+        autore = info.get("channel") or info.get("uploader") or ""
     except Exception:
         pass
     if not descrizione:

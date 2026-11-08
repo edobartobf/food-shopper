@@ -51,15 +51,21 @@ Regole:
 lista e metti il gruppo nella nota solo se serve a capire.
 - Quantità numeriche per le porzioni indicate: frazioni in decimali ("½" → 0.5), intervalli al valore medio \
 ("4-5 mele" → 4.5 pz). Converti le unità americane in metriche (1 cup ≈ 240 ml o il peso tipico dell'ingrediente, \
-1 tbsp = cucchiaio, 1 tsp = cucchiaino, oz → g). "Un petto di pollo" → 1 pz; "una confezione" → 1 confezione; \
-"un bicchiere" → 200 ml. Se c'è sia un numero di pezzi sia un peso, usa il peso (es. "800 g di salmone in 4 tranci" → 800 g).
-- q.b. o quantità non indicata: quantita null, unita null, qb true.
+1 tbsp = cucchiaio, 1 tsp = cucchiaino, oz → g). "Un petto di pollo" → 1 pz; "una confezione" o "una bustina" → \
+1 confezione; i bicchieri vanno in ml ("un bicchiere" → 200 ml, "mezzo bicchiere" → 100 ml), mai in tazze. \
+Se c'è sia un numero di pezzi sia un peso, usa il peso (es. "800 g di salmone in 4 tranci" → 800 g).
+- Non mettere tra gli ingredienti l'acqua del rubinetto né il ghiaccio: se serve una quantità d'acqua, scrivila nel \
+passaggio. L'acqua in bottiglia o frizzante invece è un ingrediente.
+- q.b., "un pizzico" o quantità non indicata: quantita null, unita null, qb true (l'eventuale "un pizzico" va nella nota).
 - Reparto: scegli SOLO tra quelli della lista data.
-- Porzioni: quelle indicate; se mancano, stimale (di solito 2-4). Tempo: totale in minuti se indicato o deducibile, \
+- Porzioni: quelle indicate (per un intervallo come "6-8" usa il valore più basso); se mancano, stimale (di solito 2-4). Tempo: totale in minuti se indicato o deducibile, \
 altrimenti null.
 - Passaggi: brevi e in ordine, all'imperativo ("Taglia…", "Cuoci…"), uno per azione principale. Se la fonte non li ha \
 ma il parlato o il contesto li rende chiari, ricostruiscili; non inventare passaggi non deducibili.
-- Tag: da 1 a 4, minuscoli. Riusa i tag già in uso quando calzano.
+- Tag: da 1 a 4, minuscoli, presi preferibilmente da: antipasti, primi, secondi, contorni, piatti unici, dolci, \
+colazione, pane e lievitati, salse, pesce, carne, vegetariano, vegano, veloce, forno, friggitrice ad aria, asiatico. \
+Il primo tag è la portata. "forno" solo se si cuoce in forno, "veloce" solo se si fa in 30 minuti o meno, "dolci" \
+solo per i dolci. Riusa i tag già in uso quando calzano.
 - Didascalie e parlato possono contenere saluti, pubblicità e hashtag: ignorali. La trascrizione automatica del parlato \
 può avere errori: correggili col buon senso (es. nomi di ingredienti storpiati).
 - Se non c'è una ricetta o non c'è nessun modo di capire gli ingredienti, e_una_ricetta = false e spiega in "motivo" \
@@ -121,10 +127,23 @@ def estrai(materiale: Materiale, reparti: list[str], tag_esistenti: list[str], c
     if risposta.stop_reason == "max_tokens" or risposta.parsed_output is None:
         raise ErroreImport("La ricetta è troppo lunga o confusa da estrarre: prova a incollare solo ingredienti e passaggi.")
     r = risposta.parsed_output
-    # Il reparto deve essere uno di quelli configurati
+    pulisci(r, reparti)
+    return r
+
+
+ACQUA = {"acqua", "acqua del rubinetto", "acqua calda", "acqua fredda", "acqua tiepida", "ghiaccio", "acqua bollente"}
+
+
+def pulisci(r: RicettaEstratta, reparti: list[str]) -> None:
+    """Corregge quello che il modello a volte sbaglia, così la lista della spesa resta pulita."""
+    r.ingredienti = [i for i in r.ingredienti if i.nome.strip().lower() not in ACQUA]
     for i in r.ingredienti:
+        i.nome = i.nome.strip().lower()
         if i.reparto not in reparti:
             i.reparto = "altro" if "altro" in reparti else reparti[-1]
-        if i.qb:
-            i.quantita, i.unita = None, None
-    return r
+        if i.unita == "pizzico":
+            i.nota = i.nota or "un pizzico"
+            i.quantita = None
+        if i.qb or i.quantita is None:
+            i.qb, i.quantita, i.unita = True, None, None
+    r.tag = list(dict.fromkeys(t.strip().lower() for t in r.tag if t.strip()))[:4]
