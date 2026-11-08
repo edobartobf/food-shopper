@@ -72,8 +72,10 @@ nella nota.
 - Dosi mancanti: se la fonte non indica la quantità di un ingrediente da comprare (carne, pesce, pasta, riso, verdure, \
 formaggi, latticini, farine…), stimala tu per le porzioni della ricetta con valori realistici da ricettario italiano \
 (es. per 2 persone: 160-200 g di pasta o gnocchi, 250-300 g di pesce o carne, 125 g di mozzarella) e metti \
-stimata = true. Se la dose c'è nella fonte (anche nel parlato), usala e metti stimata = false. Non stimare mai le \
-voci q.b.
+stimata = true. Vale anche quando la fonte scrive "q.b." per un ingrediente da comprare (es. "Mozzarella q.b." → \
+mozzarella ≈ 125 g stimata; "Parmigiano grattugiato q.b." → ≈ 30 g stimata): al supermercato serve una quantità. \
+Se la dose c'è nella fonte (anche nel parlato), usala e metti stimata = false. Non stimare mai le voci q.b. vere \
+(sale, pepe, olio, spezie, erbe, salse a gocce, guarnizioni).
 - Reparto: scegli SOLO tra quelli della lista data.
 - Porzioni: quelle indicate (per un intervallo come "6-8" usa il valore più basso); se mancano, stimale (di solito 2-4). Tempo: minuti di preparazione più cottura se \
 indicati o deducibili, senza riposi, ammolli o marinature lunghe (quelli vanno nelle note); altrimenti null.
