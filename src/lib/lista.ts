@@ -21,6 +21,8 @@ export interface Voce {
   da_ricette: string[]
   aggiunta_da: string
   nota?: string
+  /** almeno una dose viene da una ricetta che non la indicava */
+  stimata?: boolean
 }
 
 export interface Lista {
@@ -36,6 +38,7 @@ export interface VoceNuova {
   reparto: string
   qb: boolean
   da_ricetta?: string
+  stimata?: boolean
 }
 
 type Bersaglio = { voce: string; chiave: string }
@@ -43,7 +46,7 @@ type Bersaglio = { voce: string; chiave: string }
 export type Operazione = { id: string; autore: string } & (
   | { tipo: 'aggiungi'; voci: VoceNuova[] }
   | ({ tipo: 'spunta'; valore: boolean } & Bersaglio)
-  | ({ tipo: 'modifica'; campi: Partial<Pick<Voce, 'nome' | 'quantita' | 'reparto' | 'qb' | 'nota'>> } & Bersaglio)
+  | ({ tipo: 'modifica'; campi: Partial<Pick<Voce, 'nome' | 'quantita' | 'reparto' | 'qb' | 'nota' | 'stimata'>> } & Bersaglio)
   | ({ tipo: 'elimina' } & Bersaglio)
   | { tipo: 'svuota'; solo_spuntate: boolean }
 )
@@ -81,7 +84,7 @@ export function sommaQuantita(a: Quantita[], b: Quantita[]): Quantita[] {
   return risultato
 }
 
-export function formattaQuantitaVoce(v: Pick<Voce, 'quantita' | 'qb'>): string {
+export function formattaQuantitaVoce(v: Pick<Voce, 'quantita' | 'qb' | 'stimata'>): string {
   const parti = v.quantita.map((q) => {
     let { valore, unita } = q
     if (unita === 'g' && valore >= 1000) [valore, unita] = [valore / 1000, 'kg']
@@ -90,7 +93,7 @@ export function formattaQuantitaVoce(v: Pick<Voce, 'quantita' | 'qb'>): string {
     return unita ? `${n} ${unitaPerQuantita(unita, arrotonda(valore))}` : n
   })
   if (v.qb && !parti.length) return 'q.b.'
-  return parti.join(' + ')
+  return v.stimata && parti.length ? `≈ ${parti.join(' + ')}` : parti.join(' + ')
 }
 
 function trova(lista: Lista, b: Bersaglio): Voce | undefined {
@@ -111,6 +114,7 @@ export function applica(partenza: Lista, op: Operazione): Lista {
         if (esistente) {
           esistente.quantita = sommaQuantita(esistente.quantita, n.quantita)
           esistente.qb = esistente.qb || n.qb
+          if (n.stimata && n.quantita.length) esistente.stimata = true
           esistente.spuntata = false
           if (n.da_ricetta && !esistente.da_ricette.includes(n.da_ricetta)) esistente.da_ricette.push(n.da_ricetta)
         } else {
@@ -123,6 +127,7 @@ export function applica(partenza: Lista, op: Operazione): Lista {
             spuntata: false,
             da_ricette: n.da_ricetta ? [n.da_ricetta] : [],
             aggiunta_da: op.autore,
+            ...(n.stimata && n.quantita.length ? { stimata: true } : {}),
           })
         }
       })

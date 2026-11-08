@@ -616,3 +616,8 @@ label.spunta input {
 .scelta-ricetta.scelta {
   border-color: var(--primario);
 }
+
+.legenda {
+  margin: 6px 2px 0;
+  font-size: 13px;
+}

@@ -158,3 +158,14 @@ describe('plurali delle unità', () => {
     expect(formattaQuantitaVoce({ quantita: [{ valore: 5.5, unita: 'cucchiaio' }], qb: false })).toBe('5,5 cucchiai')
   })
 })
+
+describe('dosi stimate', () => {
+  it('una dose stimata resta segnata in lista, anche sommata', () => {
+    const conStima = op({ tipo: 'aggiungi', voci: [{ nome: 'totano', quantita: [{ valore: 300, unita: 'g' }], reparto: 'carne e pesce', qb: false, stimata: true }] })
+    const senza = op({ tipo: 'aggiungi', voci: [{ nome: 'totano', quantita: [{ valore: 200, unita: 'g' }], reparto: 'carne e pesce', qb: false }] })
+    const l = applicaTutte(listaVuota(), [senza, conStima])
+    expect(formattaQuantitaVoce(l.voci[0]!)).toBe('≈ 500 g')
+    const corretta = applica(l, op({ tipo: 'modifica', voce: l.voci[0]!.id, chiave: 'totano', campi: { quantita: [{ valore: 400, unita: 'g' }], stimata: false } }))
+    expect(formattaQuantitaVoce(corretta.voci[0]!)).toBe('400 g')
+  })
+})

@@ -50,7 +50,7 @@ function aggiungi() {
 
 function apriModifica(v: Voce) {
   inModifica.value = v.id
-  bozza.value = { nome: v.nome, quantita: formattaQuantitaVoce({ ...v, qb: false }), reparto: v.reparto, nota: v.nota ?? '' }
+  bozza.value = { nome: v.nome, quantita: formattaQuantitaVoce({ ...v, qb: false, stimata: false }), reparto: v.reparto, nota: v.nota ?? '' }
 }
 
 function salvaModifica(v: Voce) {
@@ -59,6 +59,7 @@ function salvaModifica(v: Voce) {
     nome: bozza.value.nome.trim() || v.nome,
     quantita,
     qb: !quantita.length && v.qb,
+    stimata: v.stimata && bozza.value.quantita === formattaQuantitaVoce({ ...v, qb: false, stimata: false }),
     reparto: bozza.value.reparto,
     nota: bozza.value.nota.trim(),
   })

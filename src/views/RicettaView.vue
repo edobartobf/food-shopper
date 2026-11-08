@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { aggiornaRicettario, eliminaRicetta, formattaQuantita, gruppiIngredienti, ricettario, salvaRicetta } from '../lib/ricette'
+import { aggiornaRicettario, eliminaRicetta, formattaQuantita, gruppiIngredienti, ricettario, salvaRicetta, senzaStime } from '../lib/ricette'
 import { aggiungiVoci, caricaLocale } from '../lib/spesa'
 import { vociDaRicetta } from '../lib/daRicette'
 
@@ -32,6 +32,7 @@ onMounted(() => {
   if (!ricettario.caricato) void aggiornaRicettario()
 })
 
+const conStime = computed(() => ricetta.value?.ingredienti.some((i) => i.stimata) ?? false)
 const gruppi = computed(() => gruppiIngredienti(ricetta.value?.ingredienti ?? []))
 const fattore = computed(() => (ricetta.value ? porzioni.value / ricetta.value.porzioni : 1))
 const NOMI_FONTE: Record<string, string> = {
@@ -48,7 +49,7 @@ async function conferma() {
   lavoro.value = true
   errore.value = ''
   try {
-    await salvaRicetta({ ...ricetta.value, da_ricontrollare: false })
+    await salvaRicetta({ ...ricetta.value, da_ricontrollare: false, ingredienti: senzaStime(ricetta.value.ingredienti) })
   } catch (e) {
     errore.value = e instanceof Error ? e.message : String(e)
   } finally {
@@ -135,6 +136,9 @@ async function elimina() {
       </template>
       <p v-if="!ricetta.ingredienti.length" class="tenue" style="margin: 10px 0">Nessun ingrediente</p>
     </div>
+    <p v-if="conStime" class="tenue legenda">
+      ≈ dose stimata: la fonte non la indicava. Correggila con <strong>Modifica</strong>, oppure conferma la ricetta se ti va bene.
+    </p>
 
     <div class="azioni" style="margin-top: 0">
       <button :disabled="!ricetta.ingredienti.length" @click="aggiungiAllaSpesa">🛒 Aggiungi alla spesa ({{ porzioni }} porz.)</button>

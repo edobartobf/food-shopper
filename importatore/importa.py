@@ -69,6 +69,14 @@ def raccogli(imp: dict, repo: Path) -> Materiale:
     return m
 
 
+def ingrediente_json(i) -> dict:
+    """Campi vuoti tolti, tranne quantità e unità; "stimata" solo quando è vera."""
+    d = i.model_dump(exclude_none=True) | {"quantita": i.quantita, "unita": i.unita}
+    if not d.get("stimata"):
+        d.pop("stimata", None)
+    return d
+
+
 def completa(estratta, m: Materiale, reparti, tag_esistenti, estrai):
     """Se mancano ingredienti della fonte, riprova una volta indicando quali; tiene il risultato più completo."""
     mancano = ingredienti_mancanti(m, estratta.ingredienti)
@@ -128,7 +136,7 @@ def main(repo: Path) -> int:
                 "porzioni": max(1, estratta.porzioni),
                 "tempo_minuti": estratta.tempo_minuti,
                 "tag": [t.strip().lower() for t in estratta.tag if t.strip()][:4],
-                "ingredienti": [i.model_dump(exclude_none=True) | {"quantita": i.quantita, "unita": i.unita} for i in estratta.ingredienti],
+                "ingredienti": [ingrediente_json(i) for i in estratta.ingredienti],
                 "passaggi": estratta.passaggi,
                 "fonte": {
                     "tipo": m.tipo,

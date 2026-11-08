@@ -88,3 +88,23 @@ describe('gruppi di ingredienti', () => {
     ])
   })
 })
+
+describe('dosi stimate nelle ricette', () => {
+  it('mostra ≈ e la conferma la toglie', async () => {
+    const { formattaQuantita, senzaStime } = await import('../src/lib/ricette')
+    const ing = { nome: 'totano', quantita: 300, unita: 'g', reparto: 'carne e pesce', stimata: true }
+    expect(formattaQuantita(ing)).toBe('≈ 300 g')
+    expect(formattaQuantita(senzaStime([ing])[0]!)).toBe('300 g')
+  })
+  it('le stime arrivano in lista dalla ricetta', async () => {
+    const { vociDaRicetta } = await import('../src/lib/daRicette')
+    const r = normalizza({ titolo: 't', porzioni: 2, ingredienti: [
+      { nome: 'totano', quantita: 300, unita: 'g', reparto: 'carne e pesce', stimata: true },
+      { nome: 'sale', quantita: null, unita: null, reparto: 'dispensa', qb: true },
+    ] })
+    expect(vociDaRicetta(r, 4).map((v) => [v.nome, v.quantita, v.stimata])).toEqual([
+      ['totano', [{ valore: 600, unita: 'g' }], true],
+      ['sale', [], false],
+    ])
+  })
+})

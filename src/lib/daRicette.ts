@@ -14,6 +14,7 @@ export function vociDaRicetta(r: Ricetta, porzioni: number): VoceNuova[] {
         reparto: i.reparto,
         qb: senzaQuantita,
         da_ricetta: r.id,
+        stimata: !senzaQuantita && !!i.stimata,
       }
     })
 }

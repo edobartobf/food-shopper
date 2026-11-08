@@ -18,6 +18,8 @@ export interface Ingrediente {
   gruppo?: string | null
   /** frase della fonte da cui l'import ha preso l'ingrediente */
   origine?: string | null
+  /** la fonte non dava la dose: l'ha stimata l'import */
+  stimata?: boolean
 }
 
 export interface Ricetta {
@@ -262,8 +264,12 @@ export function formattaQuantita(i: Ingrediente, fattore = 1): string {
   if (i.qb || i.quantita == null) return i.qb ? 'q.b.' : ''
   const q = Math.round(i.quantita * fattore * 100) / 100
   const numero = q.toLocaleString('it-IT', { maximumFractionDigits: 2 })
-  return i.unita ? `${numero} ${unitaPerQuantita(i.unita, q)}` : numero
+  const testo = i.unita ? `${numero} ${unitaPerQuantita(i.unita, q)}` : numero
+  return i.stimata ? `≈ ${testo}` : testo
 }
+
+/** Una ricetta confermata o corretta a mano non ha più dosi "stimate". */
+export const senzaStime = (ingredienti: Ingrediente[]): Ingrediente[] => ingredienti.map(({ stimata: _, ...i }) => i)
 
 /** Ingredienti divisi per sezione, nell'ordine della ricetta. Senza sezioni: un gruppo solo con titolo vuoto. */
 export function gruppiIngredienti(ingredienti: Ingrediente[]): { titolo: string; ingredienti: Ingrediente[] }[] {

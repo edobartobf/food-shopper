@@ -23,7 +23,8 @@ class Ingrediente(BaseModel):
         description="Unità; null se la quantità è un semplice numero di pezzi non specificato o manca"
     )
     reparto: str = Field(description="Reparto del supermercato, scelto dalla lista data")
-    qb: bool = Field(description="true se 'quanto basta' o senza quantità")
+    qb: bool = Field(description="true solo per condimenti, spezie, erbe e guarnizioni in piccole quantità da usare 'quanto basta'")
+    stimata: bool = Field(description="true se la fonte non indica la dose e la quantità è stimata da te")
     nota: Optional[str] = Field(description="Dettaglio utile breve (es. 'grattugiato', 'per servire'); null se nessuno")
     gruppo: Optional[str] = Field(
         description="Sezione della ricetta a cui appartiene, se la fonte divide gli ingredienti (es. 'impasto', 'salsa', 'per condire'); null se la fonte non ha sezioni"
@@ -65,7 +66,14 @@ in minuscolo, e mantieni l'ordine della fonte. NON fondere né sommare ingredien
 Se c'è sia un numero di pezzi sia un peso, usa il peso (es. "800 g di salmone in 4 tranci" → 800 g).
 - Non mettere tra gli ingredienti l'acqua del rubinetto né il ghiaccio: se serve una quantità d'acqua, scrivila nel \
 passaggio. L'acqua in bottiglia o frizzante invece è un ingrediente.
-- q.b., "un pizzico" o quantità non indicata: quantita null, unita null, qb true (l'eventuale "un pizzico" va nella nota).
+- q.b. (quantita null, unita null, qb true) SOLO per sale, pepe, olio per cuocere o condire, spezie, erbe aromatiche, \
+salse usate a gocce e guarnizioni (semi, zucchero a velo, prezzemolo tritato…); "un pizzico" è q.b. con "un pizzico" \
+nella nota.
+- Dosi mancanti: se la fonte non indica la quantità di un ingrediente da comprare (carne, pesce, pasta, riso, verdure, \
+formaggi, latticini, farine…), stimala tu per le porzioni della ricetta con valori realistici da ricettario italiano \
+(es. per 2 persone: 160-200 g di pasta o gnocchi, 250-300 g di pesce o carne, 125 g di mozzarella) e metti \
+stimata = true. Se la dose c'è nella fonte (anche nel parlato), usala e metti stimata = false. Non stimare mai le \
+voci q.b.
 - Reparto: scegli SOLO tra quelli della lista data.
 - Porzioni: quelle indicate (per un intervallo come "6-8" usa il valore più basso); se mancano, stimale (di solito 2-4). Tempo: minuti di preparazione più cottura se \
 indicati o deducibili, senza riposi, ammolli o marinature lunghe (quelli vanno nelle note); altrimenti null.
@@ -169,7 +177,7 @@ def pulisci(r: RicettaEstratta, reparti: list[str]) -> None:
             i.nota = i.nota or "un pizzico"
             i.quantita = None
         if i.qb or i.quantita is None:
-            i.qb, i.quantita, i.unita = True, None, None
+            i.qb, i.quantita, i.unita, i.stimata = True, None, None, False
     r.tag = list(dict.fromkeys(t.strip().lower() for t in r.tag if t.strip()))
     if r.tempo_minuti and r.tempo_minuti > 30 and "veloce" in r.tag:
         r.tag.remove("veloce")

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { aggiornaRicettario, nuovaRicetta, ricettario, salvaRicetta, UNITA, type Ricetta } from '../lib/ricette'
+import { aggiornaRicettario, nuovaRicetta, ricettario, salvaRicetta, senzaStime, UNITA, type Ricetta } from '../lib/ricette'
 
 const route = useRoute()
 const router = useRouter()
@@ -54,8 +54,9 @@ async function salva() {
       ...bozza.value,
       tag: tagTesto.value.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean),
       tempo_minuti: bozza.value.tempo_minuti || null,
-      // salvando a mano la ricetta si considera controllata
+      // salvando a mano la ricetta si considera controllata, dosi comprese
       da_ricontrollare: false,
+      ingredienti: senzaStime(bozza.value.ingredienti),
     })
     router.replace(`/ricette/${salvata.id}`)
   } catch (e) {
@@ -113,6 +114,7 @@ async function salva() {
       </div>
       <div class="riga-comandi">
         <label class="spunta"><input v-model="i.qb" type="checkbox" /> q.b.</label>
+        <span v-if="i.stimata" class="etichetta avviso" title="La fonte non indicava la dose">≈ stimata</span>
         <input v-model.trim="i.gruppo" class="gruppo-campo" placeholder="sezione (es. salsa)" aria-label="Sezione" />
         <button class="secondario piccolo" aria-label="Sposta su" @click="sposta(bozza.ingredienti, n, -1)">↑</button>
         <button class="secondario piccolo" aria-label="Sposta giù" @click="sposta(bozza.ingredienti, n, 1)">↓</button>

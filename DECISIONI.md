@@ -78,6 +78,9 @@ Contro gli ingredienti persi: ogni ingrediente ha la sua sezione (`gruppo`: impa
 da cui viene (`origine`, mostrata nell'app finché la ricetta è da ricontrollare); ingredienti uguali di sezioni diverse
 restano voci separate. `verifica.py` confronta senza AI le righe di ingredienti dei siti e le quantità delle didascalie
 con il risultato: se manca qualcosa rifà l'estrazione una volta indicando cosa, e se manca ancora lo scrive nelle note.
+Dosi mancanti: se la fonte non dà la quantità di un ingrediente da comprare, l'AI la stima per le porzioni
+(`stimata: true`) e l'app la mostra come "≈ 300 g", anche nella lista della spesa. Il segno sparisce quando la
+ricetta viene confermata o corretta. q.b. resta solo per sale, pepe, olio, spezie, erbe e guarnizioni.
 Prova senza salvare: Actions del repo dati → "Importa ricette" → Run workflow con un link e un numero di ripetizioni.
 Doppioni: si confronta il link condiviso e quello canonico (i link brevi di TikTok cambiano a ogni condivisione).
 

@@ -166,7 +166,7 @@ function esegui(op: Record<string, unknown>) {
 export const aggiungiVoci = (voci: VoceNuova[]) => voci.length && esegui({ tipo: 'aggiungi', voci })
 const bersaglio = (v: Voce) => ({ voce: v.id, chiave: chiave(v.nome) })
 export const spunta = (v: Voce, valore: boolean) => esegui({ tipo: 'spunta', valore, ...bersaglio(v) })
-export const modificaVoce = (v: Voce, campi: Partial<Pick<Voce, 'nome' | 'quantita' | 'reparto' | 'qb' | 'nota'>>) =>
+export const modificaVoce = (v: Voce, campi: Partial<Pick<Voce, 'nome' | 'quantita' | 'reparto' | 'qb' | 'nota' | 'stimata'>>) =>
   esegui({ tipo: 'modifica', campi, ...bersaglio(v) })
 export const eliminaVoce = (v: Voce) => esegui({ tipo: 'elimina', ...bersaglio(v) })
 export const svuota = (solo_spuntate: boolean) => esegui({ tipo: 'svuota', solo_spuntate })

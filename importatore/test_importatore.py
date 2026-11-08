@@ -62,10 +62,11 @@ class FintaEstratta:
             nota: str | None = None
             gruppo: str | None = None
             origine: str | None = None
+            stimata: bool = False
 
         self.e_una_ricetta, self.motivo, self.titolo = e_una_ricetta, motivo, titolo
         self.porzioni, self.tempo_minuti, self.tag, self.note = 6, 50, ["Dolci"], None
-        self.ingredienti = [I(nome="mele", quantita=3, unita="pz", reparto="frutta e verdura", qb=False), I(nome="sale", quantita=None, unita=None, reparto="dispensa", qb=True)]
+        self.ingredienti = [I(nome="mele", quantita=3, unita="pz", reparto="frutta e verdura", qb=False, stimata=True), I(nome="sale", quantita=None, unita=None, reparto="dispensa", qb=True)]
         self.passaggi = ["Taglia le mele", "Inforna"]
 
 
@@ -102,6 +103,7 @@ def test_import_riuscito_e_doppione(repo):
     assert r["titolo"] == "Torta di mele" and r["da_ricontrollare"] and r["creata_da"] == "Edoardo"
     assert r["tag"] == ["dolci"]
     assert r["ingredienti"][1] == {"nome": "sale", "quantita": None, "unita": None, "reparto": "dispensa", "qb": True}
+    assert r["ingredienti"][0]["stimata"] is True
     assert r["fonte"] == {"tipo": "sito", "url": "https://sito.it/torta", "url_condiviso": "https://sito.it/torta?utm_source=x"}
     assert not (cartella / "importazioni" / "imp-1.json").exists()
     doppione = json.loads((cartella / "importazioni" / "imp-2.json").read_text())
@@ -132,14 +134,15 @@ def test_pulisci_acqua_pizzico_tag():
     r = RicettaEstratta(
         e_una_ricetta=True, motivo=None, titolo="x", porzioni=2, tempo_minuti=20, tag=["Primi", "primi", "veloce"], passaggi=[], note=None,
         ingredienti=[
-            Ingrediente(nome="Acqua", quantita=0.5, unita="tazza", reparto="casa e igiene", qb=False, nota=None, gruppo=None, origine=None),
-            Ingrediente(nome="sale", quantita=None, unita="pizzico", reparto="dispensa", qb=False, nota=None, gruppo=None, origine=None),
-            Ingrediente(nome="riso", quantita=200, unita="g", reparto="inventato", qb=False, nota=None, gruppo=None, origine=None),
+            Ingrediente(nome="Acqua", quantita=0.5, unita="tazza", reparto="casa e igiene", qb=False, nota=None, gruppo=None, origine=None, stimata=False),
+            Ingrediente(nome="sale", quantita=None, unita="pizzico", reparto="dispensa", qb=False, nota=None, gruppo=None, origine=None, stimata=True),
+            Ingrediente(nome="riso", quantita=200, unita="g", reparto="inventato", qb=False, nota=None, gruppo=None, origine=None, stimata=False),
         ],
     )
     pulisci(r, ["dispensa", "altro"])
     assert [i.nome for i in r.ingredienti] == ["sale", "riso"]
     assert (r.ingredienti[0].qb, r.ingredienti[0].quantita, r.ingredienti[0].unita, r.ingredienti[0].nota) == (True, None, None, "un pizzico")
+    assert r.ingredienti[0].stimata is False  # un q.b. non è mai una dose stimata
     assert r.ingredienti[1].reparto == "altro"
     assert r.tag == ["primi", "veloce"]
 
