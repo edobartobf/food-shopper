@@ -169,3 +169,9 @@ describe('dosi stimate', () => {
     expect(formattaQuantitaVoce(corretta.voci[0]!)).toBe('400 g')
   })
 })
+
+describe('plurale solo sopra 1', () => {
+  it('mezzo spicchio resta singolare', () => {
+    expect(formattaQuantitaVoce({ quantita: [{ valore: 0.5, unita: 'spicchio' }], qb: false })).toBe('0,5 spicchio')
+  })
+})

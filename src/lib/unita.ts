@@ -10,7 +10,7 @@ const PLURALI: Record<string, string> = {
   confezione: 'confezioni',
 }
 
-/** "2 spicchi", "1 spicchio", "0,5 cucchiai" */
+/** "2 spicchi", "1 spicchio", "0,5 spicchio" */
 export function unitaPerQuantita(unita: string, quantita: number): string {
-  return quantita !== 1 && PLURALI[unita] ? PLURALI[unita] : unita
+  return quantita > 1 && PLURALI[unita] ? PLURALI[unita] : unita
 }
