@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { aggiornaRicettario, eliminaRicetta, formattaQuantita, ricettario, salvaRicetta } from '../lib/ricette'
+import { aggiornaRicettario, eliminaRicetta, formattaQuantita, gruppiIngredienti, ricettario, salvaRicetta } from '../lib/ricette'
 import { aggiungiVoci, caricaLocale } from '../lib/spesa'
 import { vociDaRicetta } from '../lib/daRicette'
 
@@ -32,6 +32,7 @@ onMounted(() => {
   if (!ricettario.caricato) void aggiornaRicettario()
 })
 
+const gruppi = computed(() => gruppiIngredienti(ricetta.value?.ingredienti ?? []))
 const fattore = computed(() => (ricetta.value ? porzioni.value / ricetta.value.porzioni : 1))
 const NOMI_FONTE: Record<string, string> = {
   tiktok: 'TikTok',
@@ -119,13 +120,21 @@ async function elimina() {
         <button class="secondario" aria-label="Più porzioni" @click="porzioni++">＋</button>
       </div>
     </div>
-    <ul class="ingredienti scheda-box">
-      <li v-for="(i, n) in ricetta.ingredienti" :key="n">
-        <span>{{ i.nome }}<span v-if="i.nota" class="tenue"> ({{ i.nota }})</span></span>
-        <span class="quantita">{{ formattaQuantita(i, fattore) }}</span>
-      </li>
-      <li v-if="!ricetta.ingredienti.length" class="tenue">Nessun ingrediente</li>
-    </ul>
+    <div class="ingredienti scheda-box">
+      <template v-for="g in gruppi" :key="g.titolo">
+        <h3 v-if="g.titolo" class="titolo-gruppo">{{ g.titolo }}</h3>
+        <ul>
+          <li v-for="(i, n) in g.ingredienti" :key="n">
+            <span>
+              {{ i.nome }}<span v-if="i.nota" class="tenue"> ({{ i.nota }})</span>
+              <span v-if="ricetta.da_ricontrollare && i.origine" class="origine">«{{ i.origine }}»</span>
+            </span>
+            <span class="quantita">{{ formattaQuantita(i, fattore) }}</span>
+          </li>
+        </ul>
+      </template>
+      <p v-if="!ricetta.ingredienti.length" class="tenue" style="margin: 10px 0">Nessun ingrediente</p>
+    </div>
 
     <div class="azioni" style="margin-top: 0">
       <button :disabled="!ricetta.ingredienti.length" @click="aggiungiAllaSpesa">🛒 Aggiungi alla spesa ({{ porzioni }} porz.)</button>

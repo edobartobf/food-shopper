@@ -29,6 +29,7 @@ class Materiale:
     autore: str = ""
     immagine_url: str = ""
     dati_strutturati: bool = False  # True se il testo viene da schema.org Recipe
+    ingredienti_fonte: list[str] = field(default_factory=list)  # righe di ingredienti della fonte, se strutturate
     immagini: list[tuple[str, bytes]] = field(default_factory=list)  # (media type, contenuto)
 
 
@@ -239,6 +240,7 @@ def da_sito(url: str) -> Materiale:
             url_canonico=canonico,
             immagine_url=r["immagine"] or immagine,
             dati_strutturati=True,
+            ingredienti_fonte=r["ingredienti"],
         )
     testo = testo_visibile(pagina)
     if len(testo) < 200:

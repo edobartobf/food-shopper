@@ -72,3 +72,19 @@ describe('varie', () => {
     expect(r.ingredienti[0]).toMatchObject({ nome: 'uova', reparto: 'altro' })
   })
 })
+
+describe('gruppi di ingredienti', () => {
+  it('tiene le sezioni nell’ordine della ricetta e non fonde voci uguali', async () => {
+    const { gruppiIngredienti } = await import('../src/lib/ricette')
+    const g = gruppiIngredienti([
+      { nome: 'patate', quantita: 500, unita: 'g', reparto: 'frutta e verdura', gruppo: 'impasto' },
+      { nome: 'fecola di patate', quantita: 200, unita: 'g', reparto: 'dispensa', gruppo: 'impasto' },
+      { nome: 'fecola di patate', quantita: 1, unita: 'cucchiaino', reparto: 'dispensa', gruppo: 'salsa' },
+      { nome: 'zucchina', quantita: 1, unita: 'pz', reparto: 'frutta e verdura', gruppo: 'impasto' },
+    ])
+    expect(g.map((x) => [x.titolo, x.ingredienti.length])).toEqual([
+      ['impasto', 3],
+      ['salsa', 1],
+    ])
+  })
+})

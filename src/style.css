@@ -392,9 +392,37 @@ button.piccolo {
 }
 
 .ingredienti {
-  list-style: none;
   padding: 4px 16px;
   margin-top: 10px;
+}
+
+.ingredienti ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.titolo-gruppo {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--testo-tenue);
+  margin: 14px 0 0;
+}
+
+.origine {
+  display: block;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--testo-tenue);
+}
+
+.gruppo-campo {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  font-size: 14px;
 }
 
 .ingredienti li {
@@ -405,7 +433,7 @@ button.piccolo {
   border-bottom: 1px solid var(--bordo);
 }
 
-.ingredienti li:last-child {
+.ingredienti ul:last-of-type li:last-child {
   border-bottom: none;
 }
 

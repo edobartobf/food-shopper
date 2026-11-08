@@ -25,6 +25,12 @@ class Ingrediente(BaseModel):
     reparto: str = Field(description="Reparto del supermercato, scelto dalla lista data")
     qb: bool = Field(description="true se 'quanto basta' o senza quantità")
     nota: Optional[str] = Field(description="Dettaglio utile breve (es. 'grattugiato', 'per servire'); null se nessuno")
+    gruppo: Optional[str] = Field(
+        description="Sezione della ricetta a cui appartiene, se la fonte divide gli ingredienti (es. 'impasto', 'salsa', 'per condire'); null se la fonte non ha sezioni"
+    )
+    origine: Optional[str] = Field(
+        description="Il pezzo di testo della fonte da cui viene questo ingrediente, copiato così com'è (es. '1 cucchiaino di fecola'); null se dedotto da un'immagine o dal parlato senza frase precisa"
+    )
 
 
 class RicettaEstratta(BaseModel):
@@ -47,8 +53,11 @@ Regole:
 - Tutto in italiano, anche se la fonte è in un'altra lingua: traduci titolo, ingredienti e passaggi.
 - Titolo breve e chiaro, come in un ricettario (es. "Salmone in crosta aromatica"), senza emoji né hashtag.
 - Ingredienti: nome comune da supermercato italiano, minuscolo, senza marche. Un ingrediente per voce: \
-"sale e pepe" diventano due voci. Se la fonte divide gli ingredienti in gruppi (impasto, salsa…), uniscili in un'unica \
-lista e metti il gruppo nella nota solo se serve a capire.
+"sale e pepe" diventano due voci. Ripercorri la fonte riga per riga: ogni ingrediente citato deve comparire, e in \
+"origine" copia la frase della fonte da cui lo prendi.
+- Se la fonte divide gli ingredienti in sezioni (impasto, salsa, per condire…), metti il nome della sezione in "gruppo", \
+in minuscolo, e mantieni l'ordine della fonte. NON fondere né sommare ingredienti uguali di sezioni diverse: \
+"200 g di fecola" nell'impasto e "1 cucchiaino di fecola" nella salsa sono due voci distinte. Le somme le fa l'app.
 - Quantità numeriche per le porzioni indicate: frazioni in decimali ("½" → 0.5), intervalli al valore medio \
 ("4-5 mele" → 4.5 pz). Converti le unità americane in metriche (1 cup ≈ 240 ml o il peso tipico dell'ingrediente, \
 1 tbsp = cucchiaio, 1 tsp = cucchiaino, oz → g). "Un petto di pollo" → 1 pz; "una confezione" o "una bustina" → \
@@ -87,7 +96,14 @@ def _riduci(media_type: str, dati: bytes) -> tuple[str, bytes]:
     return "image/jpeg", out.getvalue()
 
 
-def estrai(materiale: Materiale, reparti: list[str], tag_esistenti: list[str], client: anthropic.Anthropic | None = None) -> RicettaEstratta:
+def estrai(
+    materiale: Materiale,
+    reparti: list[str],
+    tag_esistenti: list[str],
+    client: anthropic.Anthropic | None = None,
+    mancanti: list[str] | None = None,
+) -> RicettaEstratta:
+    """mancanti: frammenti della fonte che un tentativo precedente ha perso (per il secondo tentativo)."""
     client = client or anthropic.Anthropic()
     contenuto: list[dict] = []
     for media_type, dati in materiale.immagini:
@@ -99,7 +115,14 @@ def estrai(materiale: Materiale, reparti: list[str], tag_esistenti: list[str], c
         f"Tipo di fonte: {materiale.tipo}" + (f" (autore: {materiale.autore})" if materiale.autore else "")
     )
     testo = materiale.testo.strip() or "(nessun testo: usa gli screenshot)"
-    contenuto.append({"type": "text", "text": f"{contesto}\n\n<materiale>\n{testo}\n</materiale>"})
+    richiesta = f"{contesto}\n\n<materiale>\n{testo}\n</materiale>"
+    if mancanti:
+        elenco = "\n".join(f"- {m}" for m in mancanti)
+        richiesta += (
+            "\n\nATTENZIONE: in un tentativo precedente questi ingredienti della fonte sono andati persi. "
+            f"Rifai l'estrazione completa includendoli come voci separate (con la loro sezione, se c'è):\n{elenco}"
+        )
+    contenuto.append({"type": "text", "text": richiesta})
 
     try:
         risposta = client.messages.parse(
@@ -139,6 +162,7 @@ def pulisci(r: RicettaEstratta, reparti: list[str]) -> None:
     r.ingredienti = [i for i in r.ingredienti if i.nome.strip().lower() not in ACQUA]
     for i in r.ingredienti:
         i.nome = i.nome.strip().lower()
+        i.gruppo = (i.gruppo or "").strip().lower() or None
         if i.reparto not in reparti:
             i.reparto = "altro" if "altro" in reparti else reparti[-1]
         if i.unita == "pizzico":

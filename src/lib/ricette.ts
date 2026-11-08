@@ -14,6 +14,10 @@ export interface Ingrediente {
   reparto: string
   qb?: boolean
   nota?: string
+  /** sezione della ricetta (es. "salsa"), se la fonte divide gli ingredienti */
+  gruppo?: string | null
+  /** frase della fonte da cui l'import ha preso l'ingrediente */
+  origine?: string | null
 }
 
 export interface Ricetta {
@@ -259,4 +263,16 @@ export function formattaQuantita(i: Ingrediente, fattore = 1): string {
   const q = Math.round(i.quantita * fattore * 100) / 100
   const numero = q.toLocaleString('it-IT', { maximumFractionDigits: 2 })
   return i.unita ? `${numero} ${unitaPerQuantita(i.unita, q)}` : numero
+}
+
+/** Ingredienti divisi per sezione, nell'ordine della ricetta. Senza sezioni: un gruppo solo con titolo vuoto. */
+export function gruppiIngredienti(ingredienti: Ingrediente[]): { titolo: string; ingredienti: Ingrediente[] }[] {
+  const gruppi: { titolo: string; ingredienti: Ingrediente[] }[] = []
+  for (const i of ingredienti) {
+    const titolo = i.gruppo?.trim() ?? ''
+    const g = gruppi.find((x) => x.titolo === titolo)
+    if (g) g.ingredienti.push(i)
+    else gruppi.push({ titolo, ingredienti: [i] })
+  }
+  return gruppi
 }

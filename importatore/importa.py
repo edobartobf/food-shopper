@@ -21,6 +21,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from fonti import ErroreImport, Materiale, da_url, url_confrontabile
+from verifica import mancanti as ingredienti_mancanti
 
 ESTENSIONI = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif"}
 
@@ -68,6 +69,29 @@ def raccogli(imp: dict, repo: Path) -> Materiale:
     return m
 
 
+def completa(estratta, m: Materiale, reparti, tag_esistenti, estrai):
+    """Se mancano ingredienti della fonte, riprova una volta indicando quali; tiene il risultato più completo."""
+    mancano = ingredienti_mancanti(m, estratta.ingredienti)
+    if not mancano:
+        return estratta, []
+    print(f"  ! mancano {mancano}: secondo tentativo")
+    seconda = estrai(m, reparti, tag_esistenti, mancanti=mancano)
+    if not seconda.e_una_ricetta:
+        return estratta, mancano
+    mancano2 = ingredienti_mancanti(m, seconda.ingredienti)
+    if len(mancano2) <= len(mancano):
+        return seconda, mancano2
+    return estratta, mancano
+
+
+def nota_con_mancanti(nota: str | None, mancano: list[str]) -> str:
+    nota = (nota or "").strip()
+    if mancano:
+        avviso = "Da controllare: nella fonte ci sono anche " + "; ".join(f"«{x}»" for x in mancano) + "."
+        nota = f"{avviso}\n{nota}".strip()
+    return nota
+
+
 def main(repo: Path) -> int:
     from estrazione import estrai  # importato qui: i test di fonti/importa non richiedono anthropic
 
@@ -96,6 +120,7 @@ def main(repo: Path) -> int:
             estratta = estrai(m, reparti, tag_esistenti)
             if not estratta.e_una_ricetta:
                 raise ErroreImport(estratta.motivo or "Non ho trovato una ricetta in questo contenuto.")
+            estratta, mancano = completa(estratta, m, reparti, tag_esistenti, estrai)
 
             ricetta = {
                 "id": id_da_titolo(estratta.titolo),
@@ -112,7 +137,7 @@ def main(repo: Path) -> int:
                     **({"autore": m.autore} if m.autore else {}),
                 },
                 "immagine_url": m.immagine_url or None,
-                "note": estratta.note or "",
+                "note": nota_con_mancanti(estratta.note, mancano),
                 "da_ricontrollare": True,
                 "creata_da": imp.get("creata_da", ""),
                 "creata_il": adesso(),
@@ -150,5 +175,25 @@ def main(repo: Path) -> int:
     return 0
 
 
+def prova(repo: Path, url: str, volte: int) -> int:
+    """Estrae la stessa ricetta più volte e stampa il risultato, senza scrivere niente nel repo."""
+    from estrazione import estrai
+
+    config = leggi_json(repo / "config.json") if (repo / "config.json").exists() else {}
+    reparti = config.get("reparti") or ["altro"]
+    m = da_url(url)
+    print(f"Fonte: {m.tipo} {m.url_canonico}\nFrammenti da controllare: {ingredienti_mancanti(m, [])}\n")
+    for n in range(1, volte + 1):
+        estratta, mancano = completa(estrai(m, reparti, []), m, reparti, [], estrai)
+        print(f"=== Prova {n}: {estratta.titolo} ({len(estratta.ingredienti)} ingredienti), mancanti: {mancano or 'nessuno'}")
+        for i in estratta.ingredienti:
+            q = "q.b." if i.qb else f"{i.quantita:g} {i.unita or ''}".strip()
+            print(f"   [{i.gruppo or '-'}] {i.nome}: {q}   «{i.origine or ''}»")
+    return 0
+
+
 if __name__ == "__main__":
-    sys.exit(main(Path(sys.argv[1] if len(sys.argv) > 1 else ".")))
+    argomenti = sys.argv[1:]
+    if argomenti and argomenti[0] == "--prova":
+        sys.exit(prova(Path("."), argomenti[1], int(argomenti[2]) if len(argomenti) > 2 else 1))
+    sys.exit(main(Path(argomenti[0] if argomenti else ".")))

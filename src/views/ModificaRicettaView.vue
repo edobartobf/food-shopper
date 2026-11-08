@@ -113,7 +113,7 @@ async function salva() {
       </div>
       <div class="riga-comandi">
         <label class="spunta"><input v-model="i.qb" type="checkbox" /> q.b.</label>
-        <span class="spazio"></span>
+        <input v-model.trim="i.gruppo" class="gruppo-campo" placeholder="sezione (es. salsa)" aria-label="Sezione" />
         <button class="secondario piccolo" aria-label="Sposta su" @click="sposta(bozza.ingredienti, n, -1)">↑</button>
         <button class="secondario piccolo" aria-label="Sposta giù" @click="sposta(bozza.ingredienti, n, 1)">↓</button>
         <button class="secondario piccolo" aria-label="Togli ingrediente" @click="bozza.ingredienti.splice(n, 1)">✕</button>
