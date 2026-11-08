@@ -74,6 +74,11 @@ Il codice sta in questo repo, cartella `importatore/` (Python: `fonti.py` raccog
 chiama Claude Haiku 5.5 con output strutturato e corregge i risultati, `importa.py` elabora le richieste).
 La Action `importa.yml` del repo dati lo scarica a ogni esecuzione e lo lancia con la chiave Anthropic.
 Le ricette importate restano "da ricontrollare" finché uno dei due non le conferma.
+Contro gli ingredienti persi: ogni ingrediente ha la sua sezione (`gruppo`: impasto, salsa…) e la frase della fonte
+da cui viene (`origine`, mostrata nell'app finché la ricetta è da ricontrollare); ingredienti uguali di sezioni diverse
+restano voci separate. `verifica.py` confronta senza AI le righe di ingredienti dei siti e le quantità delle didascalie
+con il risultato: se manca qualcosa rifà l'estrazione una volta indicando cosa, e se manca ancora lo scrive nelle note.
+Prova senza salvare: Actions del repo dati → "Importa ricette" → Run workflow con un link e un numero di ripetizioni.
 Doppioni: si confronta il link condiviso e quello canonico (i link brevi di TikTok cambiano a ogni condivisione).
 
 ## Rimandato
