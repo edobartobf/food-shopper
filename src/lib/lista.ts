@@ -1,3 +1,5 @@
+import { unitaPerQuantita } from './unita'
+
 // Logica pura della lista della spesa: nessun accesso a rete o archivi, così si testa facilmente.
 //
 // Ogni modifica è un'"operazione" (aggiungi, spunta, modifica, elimina, svuota). L'app tiene in coda le operazioni
@@ -85,7 +87,7 @@ export function formattaQuantitaVoce(v: Pick<Voce, 'quantita' | 'qb'>): string {
     if (unita === 'g' && valore >= 1000) [valore, unita] = [valore / 1000, 'kg']
     if (unita === 'ml' && valore >= 1000) [valore, unita] = [valore / 1000, 'l']
     const n = arrotonda(valore).toLocaleString('it-IT', { maximumFractionDigits: 2 })
-    return unita ? `${n} ${unita}` : n
+    return unita ? `${n} ${unitaPerQuantita(unita, arrotonda(valore))}` : n
   })
   if (v.qb && !parti.length) return 'q.b.'
   return parti.join(' + ')

@@ -58,8 +58,8 @@ Se c'è sia un numero di pezzi sia un peso, usa il peso (es. "800 g di salmone i
 passaggio. L'acqua in bottiglia o frizzante invece è un ingrediente.
 - q.b., "un pizzico" o quantità non indicata: quantita null, unita null, qb true (l'eventuale "un pizzico" va nella nota).
 - Reparto: scegli SOLO tra quelli della lista data.
-- Porzioni: quelle indicate (per un intervallo come "6-8" usa il valore più basso); se mancano, stimale (di solito 2-4). Tempo: totale in minuti se indicato o deducibile, \
-altrimenti null.
+- Porzioni: quelle indicate (per un intervallo come "6-8" usa il valore più basso); se mancano, stimale (di solito 2-4). Tempo: minuti di preparazione più cottura se \
+indicati o deducibili, senza riposi, ammolli o marinature lunghe (quelli vanno nelle note); altrimenti null.
 - Passaggi: brevi e in ordine, all'imperativo ("Taglia…", "Cuoci…"), uno per azione principale. Se la fonte non li ha \
 ma il parlato o il contesto li rende chiari, ricostruiscili; non inventare passaggi non deducibili.
 - Tag: da 1 a 4, minuscoli, presi preferibilmente da: antipasti, primi, secondi, contorni, piatti unici, dolci, \

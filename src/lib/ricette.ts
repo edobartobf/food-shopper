@@ -5,6 +5,7 @@ import { reactive } from 'vue'
 import { elencaCartella, eliminaFile, ErroreGitHub, leggiBlobJson, leggiJson, scriviJson } from './github'
 import { impostazioni } from './impostazioni'
 import { nuovoId } from './condivisi'
+import { unitaPerQuantita } from './unita'
 
 export interface Ingrediente {
   nome: string
@@ -257,5 +258,5 @@ export function formattaQuantita(i: Ingrediente, fattore = 1): string {
   if (i.qb || i.quantita == null) return i.qb ? 'q.b.' : ''
   const q = Math.round(i.quantita * fattore * 100) / 100
   const numero = q.toLocaleString('it-IT', { maximumFractionDigits: 2 })
-  return i.unita ? `${numero} ${i.unita}` : numero
+  return i.unita ? `${numero} ${unitaPerQuantita(i.unita, q)}` : numero
 }

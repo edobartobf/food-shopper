@@ -150,3 +150,11 @@ describe('oggetti reattivi di Vue', () => {
     expect(applicaTutte(stato.base, stato.coda).voci[0]!.nome).toBe('olio')
   })
 })
+
+describe('plurali delle unità', () => {
+  it('singolare solo per 1', () => {
+    expect(formattaQuantitaVoce({ quantita: [{ valore: 2, unita: 'spicchio' }], qb: false })).toBe('2 spicchi')
+    expect(formattaQuantitaVoce({ quantita: [{ valore: 1, unita: 'spicchio' }], qb: false })).toBe('1 spicchio')
+    expect(formattaQuantitaVoce({ quantita: [{ valore: 5.5, unita: 'cucchiaio' }], qb: false })).toBe('5,5 cucchiai')
+  })
+})
