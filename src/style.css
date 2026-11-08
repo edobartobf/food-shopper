@@ -469,3 +469,122 @@ label.spunta input {
   padding: 8px 0;
   background: var(--sfondo);
 }
+
+/* --- tappa 4: lista della spesa --- */
+.riga-aggiungi {
+  display: flex;
+  gap: 8px;
+}
+
+.riga-aggiungi button {
+  flex: none;
+  width: 52px;
+  font-size: 22px;
+  padding: 0;
+}
+
+.gruppo h2 {
+  font-size: 15px;
+  margin: 20px 0 6px;
+}
+
+.gruppo h2::first-letter {
+  text-transform: uppercase;
+}
+
+.gruppo h2 .tenue {
+  font-weight: 400;
+}
+
+.gruppo.carrello {
+  opacity: 0.7;
+}
+
+.scheda-box.voci {
+  padding: 0 4px 0 0;
+}
+
+.voce {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--bordo);
+}
+
+.voci > .voce:last-of-type,
+.voci > .modifica-voce:last-child {
+  border-bottom: none;
+}
+
+.spunta-voce {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 52px;
+  padding: 10px 8px 10px 14px;
+  background: none;
+  color: var(--testo);
+  font-weight: 400;
+  text-align: left;
+  border-radius: 0;
+}
+
+.cerchio {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--primario);
+  color: var(--primario-testo);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.presa .cerchio,
+.scelta .cerchio {
+  background: var(--primario);
+}
+
+.nome-voce {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.presa .nome-voce {
+  text-decoration: line-through;
+  color: var(--testo-tenue);
+}
+
+.modifica-voce {
+  padding: 12px 14px 14px;
+  background: var(--sfondo);
+  border-bottom: 1px solid var(--bordo);
+}
+
+.scelta-ricetta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 12px 0 0;
+}
+
+.scelta-ricetta .spunta-voce {
+  flex: 1 1 100%;
+  min-height: 60px;
+}
+
+.scelta-ricetta .contatore {
+  margin-left: 50px;
+  padding-bottom: 12px;
+}
+
+.scelta-ricetta.scelta {
+  border-color: var(--primario);
+}

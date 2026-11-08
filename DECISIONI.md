@@ -130,8 +130,14 @@ foto ospitate da voi, notifiche (con l'APK), liste multiple, valori nutrizionali
       "aggiunta_da": "Edoardo"
     }
   ],
-  "aggiornata_il": "2026-11-08T18:00:00Z"
+  "aggiornata_il": "2026-11-08T18:00:00Z",
+  "ops_applicate": ["mh8k2x-4f9a"]
 }
 ```
+
+La lista si modifica solo per operazioni (aggiungi, spunta, modifica, elimina, svuota). Il telefono tiene in coda
+quelle non ancora salvate e per salvarle le riapplica sull'ultima versione letta da GitHub; `ops_applicate`
+(ultime 200) evita di applicarne una due volte. Le voci uguali si riconoscono dal nome (senza maiuscole e accenti),
+le quantità si sommano per unità; kg si somma con g e l con ml, le altre unità restano separate.
 
 `config.json`: `{ "reparti": ["frutta e verdura", "carne e pesce", "latticini e uova", "pane e forno", "dispensa", "surgelati", "bevande", "casa e igiene", "altro"] }`

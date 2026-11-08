@@ -12,6 +12,7 @@ export const router = createRouter({
     { path: '/ricette/:id', component: () => import('./views/RicettaView.vue') },
     { path: '/ricette/:id/modifica', component: () => import('./views/ModificaRicettaView.vue') },
     { path: '/spesa', component: () => import('./views/SpesaView.vue') },
+    { path: '/spesa/ricette', component: () => import('./views/ScegliRicetteView.vue') },
     { path: '/importa/:id?', component: () => import('./views/ImportaView.vue') },
     { path: '/impostazioni', component: () => import('./views/ImpostazioniView.vue') },
     { path: '/configura', component: () => import('./views/ConfiguraView.vue') },

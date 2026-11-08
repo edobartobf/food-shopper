@@ -2,6 +2,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { aggiornaRicettario, eliminaRicetta, formattaQuantita, ricettario, salvaRicetta } from '../lib/ricette'
+import { aggiungiVoci, caricaLocale } from '../lib/spesa'
+import { vociDaRicetta } from '../lib/daRicette'
 
 const route = useRoute()
 const router = useRouter()
@@ -10,6 +12,14 @@ const porzioni = ref(0)
 const errore = ref('')
 const lavoro = ref(false)
 const confermaElimina = ref(false)
+const aggiunta = ref(false)
+
+async function aggiungiAllaSpesa() {
+  if (!ricetta.value) return
+  await caricaLocale()
+  aggiungiVoci(vociDaRicetta(ricetta.value, porzioni.value))
+  aggiunta.value = true
+}
 
 watch(
   ricetta,
@@ -116,6 +126,13 @@ async function elimina() {
       </li>
       <li v-if="!ricetta.ingredienti.length" class="tenue">Nessun ingrediente</li>
     </ul>
+
+    <div class="azioni" style="margin-top: 0">
+      <button :disabled="!ricetta.ingredienti.length" @click="aggiungiAllaSpesa">🛒 Aggiungi alla spesa ({{ porzioni }} porz.)</button>
+    </div>
+    <div v-if="aggiunta" class="messaggio ok">
+      Ingredienti aggiunti alla lista. <RouterLink to="/spesa">Apri la spesa</RouterLink>
+    </div>
 
     <h2>Procedimento</h2>
     <ol v-if="ricetta.passaggi.length" class="passaggi">

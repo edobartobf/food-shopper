@@ -81,6 +81,25 @@ export async function leggiJson<T>(percorso: string): Promise<FileJson<T> | null
   return { dati: JSON.parse(base64InTesto(corpo.content)) as T, sha: corpo.sha }
 }
 
+/**
+ * Legge un file JSON solo se è cambiato rispetto all'etag che abbiamo già.
+ * Le risposte "non cambiato" (304) non contano nel limite di richieste di GitHub: si può controllare spesso.
+ */
+export async function leggiJsonSeCambiato<T>(
+  percorso: string,
+  etag: string | null,
+): Promise<{ cambiato: false } | { cambiato: true; file: FileJson<T> | null; etag: string | null }> {
+  const r = await richiesta(contenuti(percorso), etag ? { headers: { 'If-None-Match': etag } } : {})
+  if (r.status === 304) return { cambiato: false }
+  if (r.status === 404) return { cambiato: true, file: null, etag: null }
+  const corpo = await r.json()
+  return {
+    cambiato: true,
+    file: { dati: JSON.parse(base64InTesto(corpo.content)) as T, sha: corpo.sha },
+    etag: r.headers.get('ETag'),
+  }
+}
+
 /** Crea o aggiorna un file. Con sha: aggiorna solo se il file non è cambiato (altrimenti errore con conflitto=true). */
 export async function scriviFile(percorso: string, contenutoBase64: string, messaggio: string, sha?: string): Promise<string> {
   const r = await richiesta(contenuti(percorso), {
