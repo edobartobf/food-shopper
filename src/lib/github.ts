@@ -112,6 +112,13 @@ export async function elencaCartella(percorso: string): Promise<VoceCartella[]> 
   return (await r.json()) as VoceCartella[]
 }
 
+/** Legge un file JSON dal suo sha (blob git): utile per scaricare solo i file cambiati. */
+export async function leggiBlobJson<T>(sha: string): Promise<T> {
+  const r = await richiesta(`/repos/${impostazioni.repo}/git/blobs/${sha}`)
+  const corpo = await r.json()
+  return JSON.parse(base64InTesto(corpo.content)) as T
+}
+
 /** Controlla che il token veda il repo e possa scriverci. */
 export async function verificaAccesso(): Promise<{ ok: boolean; messaggio: string }> {
   try {

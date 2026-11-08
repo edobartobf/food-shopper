@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { eliminaCondiviso, leggiCondiviso, separaLink, tipoFonte, type ImmagineCondivisa } from '../lib/condivisi'
-import { creaImportazione } from '../lib/importazioni'
+import { creaImportazione, elencaImportazioni, type Importazione } from '../lib/importazioni'
+import { aggiornaRicettario, ricettario, trovaPerUrl, urlConfrontabile } from '../lib/ricette'
 
 const route = useRoute()
 const router = useRouter()
@@ -17,7 +18,15 @@ const idCondiviso = computed(() => (typeof route.params.id === 'string' ? route.
 
 const NOMI_FONTE = { tiktok: 'TikTok', instagram: 'Instagram', sito: 'Sito web', testo: 'Testo', screenshot: 'Screenshot' }
 const fonte = computed(() => NOMI_FONTE[tipoFonte(url.value.trim(), immagini.value.length > 0)])
-const puoInviare = computed(() => !invio.value && (url.value.trim() || testo.value.trim() || immagini.value.length))
+const inCoda = ref<Importazione[]>([])
+const giaPresente = computed(() => trovaPerUrl(ricettario.ricette, separaLink(url.value, testo.value).url))
+const giaInCoda = computed(() => {
+  const u = separaLink(url.value, testo.value).url
+  return !!u && inCoda.value.some((i) => i.stato !== 'errore' && i.url && urlConfrontabile(i.url) === urlConfrontabile(u))
+})
+const puoInviare = computed(
+  () => !invio.value && !giaPresente.value && !giaInCoda.value && (url.value.trim() || testo.value.trim() || immagini.value.length),
+)
 
 function aggiornaAnteprime() {
   anteprime.value.forEach(URL.revokeObjectURL)
@@ -25,6 +34,10 @@ function aggiornaAnteprime() {
 }
 
 onMounted(async () => {
+  void elencaImportazioni()
+    .then((l) => (inCoda.value = l))
+    .catch(() => {})
+  const caricamentoRicette = ricettario.caricato ? Promise.resolve() : aggiornaRicettario()
   if (!idCondiviso.value) return
   const c = await leggiCondiviso(idCondiviso.value)
   if (!c) return
@@ -33,6 +46,12 @@ onMounted(async () => {
   testo.value = separati.testo
   immagini.value = c.immagini
   aggiornaAnteprime()
+  // Link già importato: apri direttamente la ricetta esistente
+  await caricamentoRicette
+  if (giaPresente.value && !immagini.value.length) {
+    await eliminaCondiviso(idCondiviso.value)
+    router.replace({ path: `/ricette/${giaPresente.value.id}`, query: { gia: '1' } })
+  }
 })
 onUnmounted(() => anteprime.value.forEach(URL.revokeObjectURL))
 
@@ -94,6 +113,11 @@ async function importa() {
     <p v-if="anteprime.length" class="tenue" style="margin-top: 6px">Tocca uno screenshot per toglierlo.</p>
 
     <p class="tenue" style="margin-top: 12px">Tipo: <span class="etichetta">{{ fonte }}</span></p>
+
+    <div v-if="giaPresente" class="messaggio avviso">
+      Questo link è già nel ricettario: <RouterLink :to="`/ricette/${giaPresente.id}`">{{ giaPresente.titolo }}</RouterLink>
+    </div>
+    <div v-else-if="giaInCoda" class="messaggio avviso">Questo link è già in elaborazione.</div>
 
     <div class="azioni">
       <button :disabled="!puoInviare" @click="importa">{{ invio ? 'Invio…' : 'Importa' }}</button>

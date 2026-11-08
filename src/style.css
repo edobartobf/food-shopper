@@ -243,3 +243,229 @@ button:disabled {
 .spezza {
   overflow-wrap: anywhere;
 }
+
+/* --- tappa 2: ricettario --- */
+a {
+  color: var(--primario);
+}
+
+.intestazione {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.intestazione h1 {
+  margin-bottom: 12px;
+}
+
+.pulsante-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--primario);
+  color: var(--primario-testo);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pulsante-link.secondario {
+  background: var(--primario-tenue);
+  color: var(--testo);
+}
+
+.azioni > .pulsante-link {
+  flex: 1 1 auto;
+}
+
+button.pericolo {
+  background: var(--errore-sfondo);
+  color: var(--errore);
+}
+
+button.piccolo {
+  min-height: 36px;
+  min-width: 40px;
+  padding: 6px 10px;
+}
+
+.cerca {
+  margin: 8px 0 10px;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+  scrollbar-width: none;
+}
+
+.chip {
+  flex: none;
+  min-height: 34px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--superficie);
+  color: var(--testo);
+  border: 1px solid var(--bordo);
+}
+
+.chip.attivo {
+  background: var(--primario);
+  color: var(--primario-testo);
+  border-color: var(--primario);
+}
+
+.scheda-box.compatta {
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.voce-ricetta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.voce-ricetta img {
+  width: 64px;
+  height: 64px;
+  flex: none;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.testo-voce {
+  min-width: 0;
+}
+
+.titolo-voce {
+  font-weight: 600;
+}
+
+.mini-tag {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.indietro {
+  display: inline-block;
+  padding: 6px 0;
+  margin-bottom: 4px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.copertina {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: var(--raggio);
+  margin-bottom: 12px;
+}
+
+.contatore {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.contatore button {
+  min-height: 36px;
+  min-width: 40px;
+  padding: 4px 10px;
+}
+
+.ingredienti {
+  list-style: none;
+  padding: 4px 16px;
+  margin-top: 10px;
+}
+
+.ingredienti li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--bordo);
+}
+
+.ingredienti li:last-child {
+  border-bottom: none;
+}
+
+.quantita {
+  flex: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.passaggi {
+  padding-left: 22px;
+}
+
+.passaggi li {
+  margin-bottom: 10px;
+}
+
+.riga-campi {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.riga-campi.tre {
+  grid-template-columns: 0.8fr 1fr 1.4fr;
+  margin-top: 8px;
+}
+
+.riga-campi.tre select,
+.riga-campi.tre input {
+  padding: 10px 8px;
+}
+
+.riga-comandi {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.spazio {
+  flex: 1;
+}
+
+label.spunta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-weight: 500;
+}
+
+label.spunta input {
+  width: 20px;
+  height: 20px;
+}
+
+.barra-salva {
+  position: sticky;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  padding: 8px 0;
+  background: var(--sfondo);
+}
