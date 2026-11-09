@@ -32,7 +32,8 @@ async function richiesta(percorso: string, init: RequestInit = {}): Promise<Resp
   } catch {
     throw new ErroreGitHub(0, 'Nessuna connessione')
   }
-  if (!risposta.ok && risposta.status !== 404) {
+  // 304 = "non è cambiato" (risposta a If-None-Match), 404 = file assente: li gestisce chi chiama
+  if (!risposta.ok && risposta.status !== 304 && risposta.status !== 404) {
     let dettaglio = ''
     try {
       dettaglio = (await risposta.json()).message ?? ''
