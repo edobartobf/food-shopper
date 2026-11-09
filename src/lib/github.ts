@@ -101,6 +101,20 @@ export async function leggiJsonSeCambiato<T>(
   }
 }
 
+/** Legge un file così com'è (es. una foto). Restituisce null se non esiste. */
+export async function leggiFileGrezzo(percorso: string): Promise<Blob | null> {
+  const r = await richiesta(contenuti(percorso), { headers: { Accept: 'application/vnd.github.raw' } })
+  if (r.status === 404) return null
+  return r.blob()
+}
+
+/** sha attuale di un file (serve per eliminarlo). null se non esiste. */
+export async function shaFile(percorso: string): Promise<string | null> {
+  const r = await richiesta(contenuti(percorso))
+  if (r.status === 404) return null
+  return ((await r.json()) as { sha: string }).sha
+}
+
 /** Crea o aggiorna un file. Con sha: aggiorna solo se il file non è cambiato (altrimenti errore con conflitto=true). */
 export async function scriviFile(percorso: string, contenutoBase64: string, messaggio: string, sha?: string): Promise<string> {
   const r = await richiesta(contenuti(percorso), {

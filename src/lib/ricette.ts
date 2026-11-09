@@ -5,6 +5,7 @@ import { reactive } from 'vue'
 import { elencaCartella, eliminaFile, ErroreGitHub, leggiBlobJson, leggiJson, scriviJson } from './github'
 import { impostazioni } from './impostazioni'
 import { nuovoId } from './condivisi'
+import { caricaFoto, eliminaFoto } from './foto'
 import { unitaPerQuantita } from './unita'
 
 export interface Ingrediente {
@@ -32,6 +33,8 @@ export interface Ricetta {
   passaggi: string[]
   fonte: { tipo: string; url?: string; url_condiviso?: string; autore?: string }
   immagine_url?: string | null
+  /** foto vostra, salvata nel repo dati (foto/<id>.jpg): se c'è si mostra al posto di immagine_url */
+  foto?: string | null
   note?: string
   da_ricontrollare: boolean
   creata_da: string
@@ -146,6 +149,7 @@ export function normalizza(r: Partial<Ricetta>): Ricetta {
     passaggi: (r.passaggi ?? []).filter((p) => p?.trim()),
     fonte: r.fonte ?? { tipo: 'manuale' },
     immagine_url: r.immagine_url ?? null,
+    foto: r.foto ?? null,
     note: r.note ?? '',
     da_ricontrollare: r.da_ricontrollare ?? false,
     creata_da: r.creata_da ?? '',
@@ -198,9 +202,24 @@ export async function salvaRicetta(r: Ricetta): Promise<Ricetta> {
 export async function eliminaRicetta(r: Ricetta): Promise<void> {
   const sha = ricettario.sha[r.id]
   if (sha) await eliminaFile(percorso(r.id), sha, `Elimina ricetta: ${r.titolo}`)
+  void eliminaFoto(r.foto, r.titolo)
   ricettario.ricette = ricettario.ricette.filter((x) => x.id !== r.id)
   delete ricettario.sha[r.id]
   await salvaStatoInCache()
+}
+
+/** Mette, cambia (foto) o toglie (null) la vostra foto della ricetta, senza toccare il resto. */
+export async function cambiaFotoRicetta(r: Ricetta, foto: Blob | null): Promise<Ricetta> {
+  const nuova = foto ? await caricaFoto(foto, r.titolo) : null
+  let salvata: Ricetta
+  try {
+    salvata = await salvaRicetta({ ...r, foto: nuova })
+  } catch (e) {
+    void eliminaFoto(nuova, r.titolo)
+    throw e
+  }
+  if (r.foto && r.foto !== nuova) void eliminaFoto(r.foto, r.titolo)
+  return salvata
 }
 
 function aggiornaLocale(r: Ricetta, sha: string) {

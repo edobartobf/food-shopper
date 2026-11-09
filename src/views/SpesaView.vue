@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import FotoRepo from '../components/FotoRepo.vue'
+import { preparaOffline } from '../lib/foto'
+import { aggiornaPreferiti, preferitoPerNome, preferiti, voceDaPreferito } from '../lib/preferiti'
 import { CARRELLO, chiave, DISPENSA, formattaQuantitaVoce, leggiQuantita, leggiVoceLibera, raggruppa, testoDaCondividere, type Voce } from '../lib/lista'
 import { aggiornaRicettario, ricettario } from '../lib/ricette'
 import { aggiungiVoci, avviaControllo, caricaLocale, eliminaVoce, modificaVoce, spesa, spunta, svuota, vista } from '../lib/spesa'
@@ -16,6 +19,9 @@ onMounted(async () => {
   await caricaLocale()
   ferma = avviaControllo()
   if (!ricettario.caricato) void aggiornaRicettario()
+  if (!preferiti.caricato) void aggiornaPreferiti()
+  // le foto dei prodotti in lista servono proprio al supermercato, dove spesso non c'è campo
+  void preparaOffline(vista.value.voci.map((v) => v.foto).filter((f): f is string => !!f))
 })
 onUnmounted(() => ferma?.())
 
@@ -44,7 +50,9 @@ function aggiungi() {
   const testo = nuova.value.trim()
   if (!testo) return
   const { nome, quantita } = leggiVoceLibera(testo)
-  aggiungiVoci([{ nome, quantita, reparto: indovinaReparto(nome), qb: false }])
+  // un prodotto di "Ci piace" con lo stesso nome porta con sé foto, nota e reparto
+  const preferito = preferitoPerNome(preferiti.elenco, nome)
+  aggiungiVoci([preferito ? { ...voceDaPreferito(preferito), quantita } : { nome, quantita, reparto: indovinaReparto(nome), qb: false }])
   nuova.value = ''
 }
 
@@ -118,6 +126,7 @@ async function condividi() {
 
   <div class="azioni" style="margin-top: 10px">
     <RouterLink to="/spesa/ricette" class="pulsante-link secondario">📖 Da ricette</RouterLink>
+    <RouterLink to="/preferiti" class="pulsante-link secondario">♥ Ci piace</RouterLink>
     <button class="secondario" :disabled="!daComprare" @click="condividi">Condividi</button>
   </div>
   <div v-if="avviso" class="messaggio ok">{{ avviso }}</div>
@@ -152,6 +161,7 @@ async function condividi() {
             </span>
             <span class="quantita">{{ g.titolo === DISPENSA ? '' : formattaQuantitaVoce(v) }}</span>
           </button>
+          <FotoRepo v-if="v.foto" :percorso="v.foto" :alt="v.nome" class="miniatura-voce" ingrandibile />
           <button class="secondario piccolo" :aria-label="`Modifica ${v.nome}`" @click="inModifica === v.id ? (inModifica = null) : apriModifica(v)">
             ✎
           </button>

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { aggiornaRicettario, eliminaRicetta, formattaQuantita, gruppiIngredienti, ricettario, salvaRicetta, senzaStime } from '../lib/ricette'
+import FotoRepo from '../components/FotoRepo.vue'
+import SceltaFoto from '../components/SceltaFoto.vue'
+import { aggiornaRicettario, cambiaFotoRicetta, eliminaRicetta, formattaQuantita, gruppiIngredienti, ricettario, salvaRicetta, senzaStime } from '../lib/ricette'
 import { aggiungiVoci, caricaLocale } from '../lib/spesa'
 import { vociDaRicetta } from '../lib/daRicette'
 import { alterna, eFatto, quantiFatti, ricomincia, schermoAcceso } from '../lib/cucina'
@@ -92,6 +94,20 @@ async function conferma() {
   }
 }
 
+const fotoInCorso = ref(false)
+async function cambiaFoto(foto: Blob | null) {
+  if (!ricetta.value) return
+  fotoInCorso.value = true
+  errore.value = ''
+  try {
+    await cambiaFotoRicetta(ricetta.value, foto)
+  } catch (e) {
+    errore.value = e instanceof Error ? e.message : String(e)
+  } finally {
+    fotoInCorso.value = false
+  }
+}
+
 async function elimina() {
   if (!ricetta.value) return
   if (!confermaElimina.value) {
@@ -117,8 +133,9 @@ async function elimina() {
   <div v-else-if="!ricetta" class="messaggio avviso">Questa ricetta non esiste più.</div>
 
   <template v-else>
+    <FotoRepo v-if="ricetta.foto" :percorso="ricetta.foto" class="copertina" ingrandibile />
     <img
-      v-if="ricetta.immagine_url"
+      v-else-if="ricetta.immagine_url"
       :src="ricetta.immagine_url"
       alt=""
       class="copertina"
@@ -205,6 +222,17 @@ async function elimina() {
       <h2>Note</h2>
       <p style="white-space: pre-line">{{ ricetta.note }}</p>
     </template>
+
+    <h2>La vostra foto</h2>
+    <p v-if="!ricetta.foto" class="tenue" style="margin-top: 0">Scattate il piatto com'è venuto a voi: prende il posto dell'immagine della fonte.</p>
+    <div class="azioni" style="margin-top: 0">
+      <SceltaFoto
+        :testo="fotoInCorso ? 'Salvo la foto…' : ricetta.foto ? '📷 Cambia foto' : '📷 Aggiungi una foto'"
+        :disabilitato="fotoInCorso"
+        @scelta="cambiaFoto"
+      />
+      <button v-if="ricetta.foto" class="secondario" :disabled="fotoInCorso" @click="cambiaFoto(null)">Togli foto</button>
+    </div>
 
     <div v-if="errore" class="messaggio errore">{{ errore }}</div>
     <div class="azioni">

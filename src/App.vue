@@ -17,6 +17,9 @@ import { RouterLink, RouterView } from 'vue-router'
       <RouterLink to="/spesa" class="scheda">
         <span class="icona" aria-hidden="true">🛒</span><span>Spesa</span>
       </RouterLink>
+      <RouterLink to="/preferiti" class="scheda">
+        <span class="icona" aria-hidden="true">♥</span><span>Ci piace</span>
+      </RouterLink>
       <RouterLink to="/impostazioni" class="scheda">
         <span class="icona" aria-hidden="true">⚙</span><span>Impostazioni</span>
       </RouterLink>

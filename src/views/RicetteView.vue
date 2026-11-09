@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
+import FotoRepo from '../components/FotoRepo.vue'
 import { bloccata, elencaImportazioni, riprovaImportazione, togliImportazione, type Importazione } from '../lib/importazioni'
 import { aggiornaRicettario, filtraRicette, ricettario, tuttiITag } from '../lib/ricette'
 
@@ -127,7 +128,8 @@ const data = (iso: string) =>
   <p v-else-if="!risultati.length" class="tenue">Nessuna ricetta corrisponde alla ricerca.</p>
 
   <RouterLink v-for="r in risultati" :key="r.id" :to="`/ricette/${r.id}`" class="scheda-box voce-ricetta">
-    <img v-if="r.immagine_url" :src="r.immagine_url" alt="" loading="lazy" referrerpolicy="no-referrer" @error="($event.target as HTMLImageElement).remove()" />
+    <FotoRepo v-if="r.foto" :percorso="r.foto" />
+    <img v-else-if="r.immagine_url" :src="r.immagine_url" alt="" loading="lazy" referrerpolicy="no-referrer" @error="($event.target as HTMLImageElement).remove()" />
     <div class="testo-voce">
       <div class="titolo-voce">{{ r.titolo }}</div>
       <div class="tenue">

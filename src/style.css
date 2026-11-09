@@ -84,6 +84,15 @@ body {
   text-decoration: none;
 }
 
+/* cinque schede: sui telefoni stretti il testo si rimpicciolisce invece di uscire */
+@media (max-width: 380px) {
+  .scheda {
+    min-width: 0;
+    font-size: 11px;
+    letter-spacing: -0.2px;
+  }
+}
+
 .scheda .icona {
   font-size: 20px;
   line-height: 1.2;
@@ -647,4 +656,117 @@ label.spunta input {
 .legenda {
   margin: 6px 2px 0;
   font-size: 13px;
+}
+
+/* --- foto salvate nel repo dati --- */
+.foto-in-arrivo {
+  display: block;
+  flex: none;
+  background: var(--primario-tenue);
+  border-radius: 8px;
+}
+
+.voce-ricetta .foto-in-arrivo {
+  width: 64px;
+  height: 64px;
+}
+
+.anteprime .foto-in-arrivo {
+  width: 88px;
+  height: 88px;
+}
+
+img.ingrandibile {
+  cursor: zoom-in;
+}
+
+.foto-grande {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 0.88);
+  padding: 16px;
+}
+
+.foto-grande img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.foto-grande button {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  right: 12px;
+}
+
+.miniatura-voce {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--bordo);
+}
+
+.voce .foto-in-arrivo {
+  width: 44px;
+  height: 44px;
+}
+
+/* --- Ci piace --- */
+.griglia-preferiti {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.preferito {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  margin: 0;
+  min-width: 0;
+}
+
+.apri-preferito {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: inherit;
+  text-decoration: none;
+  flex: 1;
+  min-width: 0;
+}
+
+.foto-preferito {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+
+.foto-preferito.senza-foto {
+  background: var(--primario-tenue);
+  color: var(--primario);
+  font-size: 32px;
+}
+
+.nota-preferito {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.foto-scheda .copertina {
+  max-height: 320px;
+  display: block;
 }

@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
+import FotoRepo from '../components/FotoRepo.vue'
+import SceltaFoto from '../components/SceltaFoto.vue'
+import { caricaFoto, eliminaFoto } from '../lib/foto'
 import { aggiornaRicettario, nuovaRicetta, ricettario, salvaRicetta, senzaStime, UNITA, type Ricetta } from '../lib/ricette'
 
 const route = useRoute()
@@ -10,12 +13,28 @@ const bozza = ref<Ricetta | null>(nuova.value ? nuovaRicetta() : null)
 const tagTesto = ref('')
 const errore = ref('')
 const salvataggio = ref(false)
+// foto scelta ma non ancora caricata: si carica salvando
+const fotoNuova = ref<Blob | null>(null)
+const anteprima = ref('')
+let fotoOriginale: string | null = null
+
+function scegliFoto(foto: Blob | null) {
+  if (anteprima.value) URL.revokeObjectURL(anteprima.value)
+  fotoNuova.value = foto
+  anteprima.value = foto ? URL.createObjectURL(foto) : ''
+}
+function togliFoto() {
+  scegliFoto(null)
+  if (bozza.value) bozza.value.foto = null
+}
+onUnmounted(() => scegliFoto(null))
 
 function prepara() {
   if (bozza.value) return
   const r = ricettario.ricette.find((x) => x.id === route.params.id)
   if (!r) return
   bozza.value = JSON.parse(JSON.stringify(r))
+  fotoOriginale = r.foto ?? null
   tagTesto.value = r.tag.join(', ')
 }
 
@@ -49,17 +68,23 @@ async function salva() {
   }
   salvataggio.value = true
   errore.value = ''
+  let caricata: string | null = null
   try {
+    if (fotoNuova.value) caricata = await caricaFoto(fotoNuova.value, bozza.value.titolo)
     const salvata = await salvaRicetta({
       ...bozza.value,
+      foto: caricata ?? bozza.value.foto ?? null,
       tag: tagTesto.value.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean),
       tempo_minuti: bozza.value.tempo_minuti || null,
       // salvando a mano la ricetta si considera controllata, dosi comprese
       da_ricontrollare: false,
       ingredienti: senzaStime(bozza.value.ingredienti),
     })
+    if (fotoOriginale && fotoOriginale !== salvata.foto) void eliminaFoto(fotoOriginale, salvata.titolo)
+    fotoNuova.value = null
     router.replace(`/ricette/${salvata.id}`)
   } catch (e) {
+    void eliminaFoto(caricata, bozza.value.titolo)
     errore.value = e instanceof Error ? e.message : String(e)
   } finally {
     salvataggio.value = false
@@ -142,8 +167,18 @@ async function salva() {
       <textarea id="note" v-model="bozza.note" rows="3" style="min-height: 72px"></textarea>
       <label for="fonte">Link della fonte</label>
       <input id="fonte" v-model.trim="bozza.fonte.url" type="url" inputmode="url" placeholder="https://…" />
+      <label>La vostra foto</label>
+      <div v-if="anteprima || bozza.foto" class="anteprime" style="margin-bottom: 8px">
+        <img v-if="anteprima" :src="anteprima" alt="Foto scelta" />
+        <FotoRepo v-else-if="bozza.foto" :percorso="bozza.foto" alt="Foto della ricetta" />
+      </div>
+      <div class="azioni" style="margin-top: 0">
+        <SceltaFoto :testo="anteprima || bozza.foto ? '📷 Cambia foto' : undefined" @scelta="scegliFoto" />
+        <button v-if="anteprima || bozza.foto" type="button" class="secondario" @click="togliFoto">Togli foto</button>
+      </div>
       <label for="immagine">Link di un'immagine</label>
       <input id="immagine" v-model.trim="bozza.immagine_url" type="url" inputmode="url" placeholder="https://…" />
+      <p class="tenue" style="margin: 4px 0 0">Si vede solo se non c'è una vostra foto.</p>
     </div>
 
     <div v-if="errore" class="messaggio errore">{{ errore }}</div>

@@ -88,9 +88,22 @@ ricetta viene confermata o corretta. q.b. resta solo per sale, pepe, olio, spezi
 Prova senza salvare: Actions del repo dati → "Importa ricette" → Run workflow con un link e un numero di ripetizioni.
 Doppioni: si confronta il link condiviso e quello canonico (i link brevi di TikTok cambiano a ogni condivisione).
 
+## Foto e "Ci piace" (9/11)
+Foto vostre al posto dei soli link: si scattano o si scelgono dalla galleria, il telefono le riduce (lato lungo
+1280 px, JPEG 80%: sui 150–400 KB) e le carica nel repo dati in `foto/<id>.jpg`. Il repo è privato, quindi
+l'app le scarica con il token e le tiene in IndexedDB: si vedono anche offline. Le foto dei prodotti "Ci piace" e
+quelle delle voci in lista si scaricano in anticipo, perché servono al supermercato, spesso senza campo.
+- **Foto del piatto**: campo `foto` della ricetta; se c'è prende il posto di `immagine_url`. Dalla pagina della
+  ricetta si mette o si cambia senza confermarla (resta "da ricontrollare" se lo era).
+- **Ci piace**: prodotti precisi (quel pesto, quella marca) con foto, nota e reparto, un file per prodotto.
+  "🛒 In lista" li aggiunge alla spesa con foto e nota; anche scrivendo a mano lo stesso nome in lista la voce
+  prende foto, nota e reparto del prodotto. In lista un tocco sulla miniatura apre la foto grande.
+- Una foto tolta o sostituita, o di una ricetta o un prodotto eliminati, si cancella dal repo.
+- Commit su `foto/` e `preferiti/` non fanno partire la Action di import (parte solo su `importazioni/**`).
+
 ## Rimandato
 Ricette solo parlate senza sottotitoli (Whisper), testo in sovrimpressione nei video, dispensa, pianificazione dei pasti,
-foto ospitate da voi, notifiche (con l'APK), liste multiple, valori nutrizionali.
+notifiche (con l'APK), liste multiple, valori nutrizionali.
 
 ## Tappe
 1. Repo, app di base installabile, menu Condividi, configurazione del token.
@@ -99,6 +112,7 @@ foto ospitate da voi, notifiche (con l'APK), liste multiple, valori nutrizionali
 4. Lista della spesa condivisa e offline.
 5. (9/11) Provata sul telefono vero da Edoardo: installazione e menu Condividi funzionano. Poi import bloccati e
    modalità cucina.
+6. (9/11) Foto vostre: foto del piatto nelle ricette e sezione "Ci piace" con i prodotti da ricordare.
 
 ## Formato dei dati
 
@@ -117,6 +131,7 @@ foto ospitate da voi, notifiche (con l'APK), liste multiple, valori nutrizionali
   "passaggi": ["Cuoci la pasta…", "…"],
   "fonte": { "tipo": "tiktok", "url": "https://www.tiktok.com/@…" },
   "immagine_url": "https://…",
+  "foto": "foto/mh8k2x-4f9a.jpg",
   "da_ricontrollare": true,
   "creata_da": "Edoardo",
   "creata_il": "2026-11-08T18:00:00Z",
@@ -162,5 +177,21 @@ La lista si modifica solo per operazioni (aggiungi, spunta, modifica, elimina, s
 quelle non ancora salvate e per salvarle le riapplica sull'ultima versione letta da GitHub; `ops_applicate`
 (ultime 200) evita di applicarne una due volte. Le voci uguali si riconoscono dal nome (senza maiuscole e accenti),
 le quantità si sommano per unità; kg si somma con g e l con ml, le altre unità restano separate.
+
+Una voce aggiunta da "Ci piace" ha in più `"foto": "foto/<id>.jpg"` e la `nota` del prodotto.
+
+`preferiti/<id>.json`
+```json
+{
+  "id": "mh8k2x-4f9a",
+  "nome": "Pesto Rana",
+  "nota": "quello senza aglio, banco frigo",
+  "reparto": "latticini e uova",
+  "foto": "foto/mh8k3a-77qp.jpg",
+  "creato_da": "Edoardo",
+  "creato_il": "2026-11-09T18:00:00Z",
+  "modificato_il": "2026-11-09T18:00:00Z"
+}
+```
 
 `config.json`: `{ "reparti": ["frutta e verdura", "carne e pesce", "latticini e uova", "pane e forno", "dispensa", "surgelati", "bevande", "casa e igiene", "altro"] }`

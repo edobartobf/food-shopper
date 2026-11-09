@@ -23,6 +23,8 @@ export interface Voce {
   nota?: string
   /** almeno una dose viene da una ricetta che non la indicava */
   stimata?: boolean
+  /** foto del prodotto preciso ("Ci piace"), percorso nel repo dati */
+  foto?: string
 }
 
 export interface Lista {
@@ -39,6 +41,8 @@ export interface VoceNuova {
   qb: boolean
   da_ricetta?: string
   stimata?: boolean
+  foto?: string
+  nota?: string
 }
 
 type Bersaglio = { voce: string; chiave: string }
@@ -117,6 +121,8 @@ export function applica(partenza: Lista, op: Operazione): Lista {
           if (n.stimata && n.quantita.length) esistente.stimata = true
           esistente.spuntata = false
           if (n.da_ricetta && !esistente.da_ricette.includes(n.da_ricetta)) esistente.da_ricette.push(n.da_ricetta)
+          if (n.foto && !esistente.foto) esistente.foto = n.foto
+          if (n.nota && !esistente.nota) esistente.nota = n.nota
         } else {
           lista.voci.push({
             id: `${op.id}-${i}`,
@@ -128,6 +134,8 @@ export function applica(partenza: Lista, op: Operazione): Lista {
             da_ricette: n.da_ricetta ? [n.da_ricetta] : [],
             aggiunta_da: op.autore,
             ...(n.stimata && n.quantita.length ? { stimata: true } : {}),
+            ...(n.foto ? { foto: n.foto } : {}),
+            ...(n.nota ? { nota: n.nota } : {}),
           })
         }
       })
