@@ -451,6 +451,33 @@ button.piccolo {
   margin-bottom: 10px;
 }
 
+/* modalità cucina: righe spuntabili, testo dei passaggi più grande */
+.cucina li {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.passaggi.cucina li {
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.cucina li.fatto {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.barra-cucina .azioni {
+  margin-top: 8px;
+}
+
+/* la barra ha lo stesso verde dei pulsanti secondari: qui servono bianchi con bordo */
+.barra-cucina button.secondario {
+  background: var(--superficie);
+  border: 1px solid var(--bordo);
+}
+
 .riga-campi {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -108,3 +108,34 @@ describe('dosi stimate nelle ricette', () => {
     ])
   })
 })
+
+describe('import bloccati', () => {
+  it('dopo 10 minuti dall’ultimo invio una richiesta non finita sembra bloccata', async () => {
+    const { bloccata } = await import('../src/lib/importazioni')
+    const base = { id: 'imp-1', fonte: 'tiktok' as const, url: 'u', testo: '', allegati: [], creata_da: 'Edo', errore: null }
+    const t0 = Date.parse('2026-11-09T10:00:00Z')
+    const imp = { ...base, stato: 'in_attesa' as const, creata_il: '2026-11-09T10:00:00Z' }
+    expect(bloccata(imp, t0 + 9 * 60_000)).toBe(false)
+    expect(bloccata(imp, t0 + 11 * 60_000)).toBe(true)
+    // Riprova riparte da capo
+    expect(bloccata({ ...imp, inviata_il: '2026-11-09T10:10:00Z' }, t0 + 11 * 60_000)).toBe(false)
+    // quelle con errore hanno già i loro pulsanti
+    expect(bloccata({ ...imp, stato: 'errore' as const }, t0 + 60 * 60_000)).toBe(false)
+  })
+})
+
+describe('modalità cucina', () => {
+  it('spunta e toglie le spunte per ricetta', async () => {
+    const { alterna, eFatto, quantiFatti, ricomincia } = await import('../src/lib/cucina')
+    alterna('r1', 'p-0')
+    alterna('r1', 'i--2')
+    alterna('r2', 'p-0')
+    expect(eFatto('r1', 'p-0')).toBe(true)
+    alterna('r1', 'p-0')
+    expect(eFatto('r1', 'p-0')).toBe(false)
+    expect(quantiFatti('r1')).toBe(1)
+    ricomincia('r1')
+    expect(quantiFatti('r1')).toBe(0)
+    expect(eFatto('r2', 'p-0')).toBe(true)
+  })
+})

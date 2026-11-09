@@ -68,6 +68,10 @@ e da cui si genera la lista della spesa condivisa. Decisioni prese l'8/11/2026.
 - **Lista della spesa**: una sola lista attiva. Le ricette scelte, con le porzioni, si sommano a quello che c'è già.
   Voci libere, modifica, spunta, "Svuota spuntati". Funziona offline. Si condivide come testo (es. WhatsApp).
 - Nessuna notifica a import finito: la ricetta compare "in elaborazione" e si completa da sola.
+- **Import bloccati**: se dopo 10 minuti dall'invio (o dall'ultimo Riprova, campo `inviata_il`) una richiesta non è
+  finita né in errore, la Action si è fermata senza scriverlo: l'app la mostra come "Sembra bloccato" con Riprova e Togli.
+- **Modalità cucina** ("Sto cucinando" nella ricetta): schermo sempre acceso (Screen Wake Lock, richiesto di nuovo
+  quando si torna all'app) e spunte su ingredienti e passaggi. Le spunte restano finché l'app è aperta, non vanno su GitHub.
 
 ## Importatore
 Il codice sta in questo repo, cartella `importatore/` (Python: `fonti.py` raccoglie il materiale, `estrazione.py`
@@ -93,6 +97,8 @@ foto ospitate da voi, notifiche (con l'APK), liste multiple, valori nutrizionali
 2. Ricettario (lettura, scrittura, ricerca, tag).
 3. Import con l'AI (Action nel repo dati), provato sui link veri mandati da Edoardo.
 4. Lista della spesa condivisa e offline.
+5. (9/11) Provata sul telefono vero da Edoardo: installazione e menu Condividi funzionano. Poi import bloccati e
+   modalità cucina.
 
 ## Formato dei dati
 

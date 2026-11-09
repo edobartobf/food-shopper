@@ -12,6 +12,8 @@ export interface Importazione {
   allegati: string[]
   creata_da: string
   creata_il: string
+  /** ultimo invio alla Action (creazione o Riprova) */
+  inviata_il?: string
   errore: string | null
   /** se la ricetta c'era già */
   ricetta_id?: string | null
@@ -27,6 +29,7 @@ export async function creaImportazione(url: string, testo: string, immagini: Imm
     await scriviFile(percorso, bytesInBase64(new Uint8Array(img.dati)), `Screenshot per ${id}`)
     allegati.push(percorso)
   }
+  const adesso = new Date().toISOString()
   const imp: Importazione = {
     id,
     stato: 'in_attesa',
@@ -35,7 +38,8 @@ export async function creaImportazione(url: string, testo: string, immagini: Imm
     testo,
     allegati,
     creata_da: impostazioni.nome,
-    creata_il: new Date().toISOString(),
+    creata_il: adesso,
+    inviata_il: adesso,
     errore: null,
   }
   // Questo commit fa partire la Action di import nel repo dati
@@ -52,13 +56,20 @@ export async function elencaImportazioni(): Promise<Importazione[]> {
     .sort((a, b) => b.creata_il.localeCompare(a.creata_il))
 }
 
+/** Di solito un import finisce in 1-2 minuti: dopo 10 la Action si è probabilmente fermata senza scrivere l'errore. */
+export const MINUTI_BLOCCO = 10
+
+export function bloccata(imp: Importazione, adesso = Date.now()): boolean {
+  return imp.stato !== 'errore' && adesso - Date.parse(imp.inviata_il ?? imp.creata_il) > MINUTI_BLOCCO * 60_000
+}
+
 /** Rimette in coda una richiesta non riuscita: la Action riparte. */
 export async function riprovaImportazione(imp: Importazione): Promise<void> {
   const file = await leggiJson<Importazione>(`importazioni/${imp.id}.json`)
   if (!file) return
   await scriviJson(
     `importazioni/${imp.id}.json`,
-    { ...file.dati, stato: 'in_attesa', errore: null, ricetta_id: null },
+    { ...file.dati, stato: 'in_attesa', errore: null, ricetta_id: null, inviata_il: new Date().toISOString() },
     `Riprova import ${imp.url || imp.fonte}`,
     file.sha,
   )

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
-import { elencaImportazioni, riprovaImportazione, togliImportazione, type Importazione } from '../lib/importazioni'
+import { bloccata, elencaImportazioni, riprovaImportazione, togliImportazione, type Importazione } from '../lib/importazioni'
 import { aggiornaRicettario, filtraRicette, ricettario, tuttiITag } from '../lib/ricette'
 
 const route = useRoute()
@@ -42,6 +42,7 @@ async function agisci(imp: Importazione, azione: 'riprova' | 'togli') {
       await riprovaImportazione(imp)
       imp.stato = 'in_attesa'
       imp.errore = null
+      imp.inviata_il = new Date().toISOString()
       clearTimeout(timer)
       timer = window.setTimeout(caricaImportazioni, 15000)
     } else {
@@ -85,8 +86,8 @@ const data = (iso: string) =>
     <div v-for="imp in importazioni" :key="imp.id" class="scheda-box compatta">
       <div class="spezza titolo-voce">{{ imp.url || imp.testo.slice(0, 80) || 'Screenshot' }}</div>
       <div class="tenue">
-        <span class="etichetta" :class="imp.stato === 'errore' ? 'errore' : 'avviso'">
-          {{ imp.stato === 'errore' ? 'Non riuscito' : 'In elaborazione' }}
+        <span class="etichetta" :class="imp.stato === 'errore' || bloccata(imp) ? 'errore' : 'avviso'">
+          {{ imp.stato === 'errore' ? 'Non riuscito' : bloccata(imp) ? 'Sembra bloccato' : 'In elaborazione' }}
         </span>
         · {{ imp.creata_da }} · {{ data(imp.creata_il) }}
       </div>
@@ -94,7 +95,10 @@ const data = (iso: string) =>
         {{ imp.errore }}
         <RouterLink v-if="imp.ricetta_id" :to="`/ricette/${imp.ricetta_id}`"> Apri la ricetta</RouterLink>
       </div>
-      <div v-if="imp.stato === 'errore'" class="azioni" style="margin-top: 8px">
+      <div v-if="bloccata(imp)" class="messaggio avviso">
+        È ferma da più di 10 minuti: di solito ne bastano un paio. Riprova, oppure toglila e importa la ricetta a mano.
+      </div>
+      <div v-if="imp.stato === 'errore' || bloccata(imp)" class="azioni" style="margin-top: 8px">
         <button v-if="!imp.ricetta_id" class="secondario" :disabled="inLavoro === imp.id" @click="agisci(imp, 'riprova')">Riprova</button>
         <RouterLink v-if="!imp.ricetta_id && !imp.url" to="/importa" class="pulsante-link secondario">Importa a mano</RouterLink>
         <button class="secondario" :disabled="inLavoro === imp.id" @click="agisci(imp, 'togli')">Togli</button>

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { aggiornaRicettario, eliminaRicetta, formattaQuantita, gruppiIngredienti, ricettario, salvaRicetta, senzaStime } from '../lib/ricette'
 import { aggiungiVoci, caricaLocale } from '../lib/spesa'
 import { vociDaRicetta } from '../lib/daRicette'
+import { alterna, eFatto, quantiFatti, ricomincia, schermoAcceso } from '../lib/cucina'
 
 const route = useRoute()
 const router = useRouter()
@@ -13,6 +14,40 @@ const errore = ref('')
 const lavoro = ref(false)
 const confermaElimina = ref(false)
 const aggiunta = ref(false)
+const cucina = ref(false)
+const schermoOk = ref(true)
+
+async function entraInCucina() {
+  cucina.value = true
+  schermoOk.value = await schermoAcceso(true)
+}
+function esciDallaCucina() {
+  cucina.value = false
+  void schermoAcceso(false)
+}
+onUnmounted(() => void schermoAcceso(false))
+// passando a un'altra ricetta (stessa schermata) si esce dalla modalità cucina
+watch(() => route.params.id, esciDallaCucina)
+
+/** Attributi per rendere spuntabile una riga in modalità cucina. */
+function spuntabile(chiave: string) {
+  if (!cucina.value || !ricetta.value) return {}
+  const id = ricetta.value.id
+  const fatto = eFatto(id, chiave)
+  return {
+    class: { fatto },
+    role: 'checkbox',
+    tabindex: 0,
+    'aria-checked': fatto,
+    onClick: () => alterna(id, chiave),
+    onKeydown: (e: KeyboardEvent) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault()
+        alterna(id, chiave)
+      }
+    },
+  }
+}
 
 async function aggiungiAllaSpesa() {
   if (!ricetta.value) return
@@ -113,6 +148,19 @@ async function elimina() {
       <a :href="ricetta.fonte.url" target="_blank" rel="noopener">Apri la fonte originale ↗</a>
     </p>
 
+    <div v-if="!cucina" class="azioni" style="margin-top: 4px">
+      <button class="secondario" @click="entraInCucina">🍳 Sto cucinando</button>
+    </div>
+    <div v-else class="messaggio ok barra-cucina">
+      <template v-if="schermoOk">Lo schermo resta acceso finché sei qui.</template>
+      <template v-else>Questo browser non permette di tenere acceso lo schermo.</template>
+      Tocca ingredienti e passaggi per spuntarli.
+      <div class="azioni">
+        <button class="secondario" @click="esciDallaCucina">Ho finito</button>
+        <button v-if="quantiFatti(ricetta.id)" class="secondario" @click="ricomincia(ricetta.id)">Togli le spunte</button>
+      </div>
+    </div>
+
     <div class="intestazione" style="margin-top: 16px">
       <h2 style="margin: 0">Ingredienti</h2>
       <div class="contatore" aria-label="Porzioni">
@@ -121,11 +169,11 @@ async function elimina() {
         <button class="secondario" aria-label="Più porzioni" @click="porzioni++">＋</button>
       </div>
     </div>
-    <div class="ingredienti scheda-box">
+    <div class="ingredienti scheda-box" :class="{ cucina }">
       <template v-for="g in gruppi" :key="g.titolo">
         <h3 v-if="g.titolo" class="titolo-gruppo">{{ g.titolo }}</h3>
         <ul>
-          <li v-for="(i, n) in g.ingredienti" :key="n">
+          <li v-for="(i, n) in g.ingredienti" :key="n" v-bind="spuntabile(`i-${g.titolo}-${n}`)">
             <span>
               {{ i.nome }}<span v-if="i.nota" class="tenue"> ({{ i.nota }})</span>
               <span v-if="ricetta.da_ricontrollare && i.origine" class="origine">«{{ i.origine }}»</span>
@@ -148,8 +196,8 @@ async function elimina() {
     </div>
 
     <h2>Procedimento</h2>
-    <ol v-if="ricetta.passaggi.length" class="passaggi">
-      <li v-for="(p, n) in ricetta.passaggi" :key="n">{{ p }}</li>
+    <ol v-if="ricetta.passaggi.length" class="passaggi" :class="{ cucina }">
+      <li v-for="(p, n) in ricetta.passaggi" :key="n" v-bind="spuntabile(`p-${n}`)">{{ p }}</li>
     </ol>
     <p v-else class="tenue">Nessun passaggio scritto.</p>
 
