@@ -74,7 +74,10 @@ const data = (iso: string) =>
 <template>
   <div class="intestazione">
     <h1>Ricette</h1>
-    <RouterLink to="/ricette/nuova" class="pulsante-link">＋ Nuova</RouterLink>
+    <div class="riga-comandi" style="margin: 0">
+      <RouterLink to="/ricette/nuova" class="pulsante-link">＋ Nuova</RouterLink>
+      <RouterLink to="/impostazioni" class="pulsante-link secondario" aria-label="Impostazioni">⚙</RouterLink>
+    </div>
   </div>
 
   <div v-if="route.query.importata" class="messaggio ok">

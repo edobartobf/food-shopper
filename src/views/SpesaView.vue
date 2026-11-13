@@ -6,7 +6,7 @@ import { preparaOffline } from '../lib/foto'
 import { aggiornaPreferiti, preferitoPerNome, preferiti, voceDaPreferito } from '../lib/preferiti'
 import { CARRELLO, chiave, DISPENSA, formattaQuantitaVoce, leggiQuantita, leggiVoceLibera, raggruppa, testoDaCondividere, type Voce } from '../lib/lista'
 import { aggiornaRicettario, ricettario } from '../lib/ricette'
-import { aggiungiVoci, avviaControllo, caricaLocale, eliminaVoce, modificaVoce, spesa, spunta, svuota, vista } from '../lib/spesa'
+import { aggiungiVoci, avviaControllo, caricaLocale, eliminaVoce, modificaVoce, spesa, spunta, svuota, testoStato, vista } from '../lib/spesa'
 
 const nuova = ref('')
 const inModifica = ref<string | null>(null)
@@ -29,12 +29,7 @@ const gruppi = computed(() => raggruppa(vista.value.voci, ricettario.reparti))
 const daComprare = computed(() => vista.value.voci.filter((v) => !v.spuntata).length)
 const prese = computed(() => vista.value.voci.filter((v) => v.spuntata).length)
 
-const statoTesto = computed(() => {
-  if (spesa.stato === 'invio') return 'Salvo…'
-  if (spesa.stato === 'offline') return spesa.coda.length ? `Offline · ${spesa.coda.length} ${spesa.coda.length === 1 ? 'modifica' : 'modifiche'} da inviare` : 'Offline'
-  if (spesa.stato === 'errore') return 'Non salvata'
-  return spesa.coda.length ? 'Salvo…' : 'Aggiornata'
-})
+const statoTesto = testoStato
 
 /** Reparto di un ingrediente: quello usato nelle ricette o in lista, altrimenti "altro". */
 function indovinaReparto(nome: string): string {

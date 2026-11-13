@@ -101,9 +101,30 @@ quelle delle voci in lista si scaricano in anticipo, perché servono al supermer
 - Una foto tolta o sostituita, o di una ricetta o un prodotto eliminati, si cancella dal repo.
 - Commit su `foto/` e `preferiti/` non fanno partire la Action di import (parte solo su `importazioni/**`).
 
+## Settimana: piano dei pasti (13/11)
+Un calendario condiviso: per ogni giorno colazione, pranzo e cena, con una o più ricette (con le porzioni) o una voce
+scritta a mano ("pizza fuori", "avanzi") che serve solo a ricordare. Si apre dalla scheda **Settimana** o da una ricetta
+("Mettila in settimana"). Le Impostazioni sono passate nel ⚙ in alto nelle Ricette, per lasciare la scheda alla Settimana.
+- **Porzioni**: quelle che si scelgono quando si mette la ricetta nel giorno (di partenza 2). Niente gestione degli
+  avanzi: scelta di Edoardo, ci si regola da soli.
+- **Fai la spesa**: si sceglie quando si fa la spesa (oggi, domani, dopodomani) e per quanti giorni (2, 3, fino a domenica,
+  una settimana, o fino a una data). Gli ingredienti dei pasti di quei giorni vanno in lista, sommati come sempre, e il
+  pasto viene segnato "in lista" (`spesa_il`), così la volta dopo non si ricompra. Dal pasto si può togliere il segno.
+- **Freschi**: una tabella fissa in `conservazione.ts` (non l'AI: vale subito per tutte le ricette e non costa) dice
+  quanti giorni dura in frigo un fresco e se si può congelare (pesce 1 giorno, macinato 1, pollo e salsiccia 2, carne 3,
+  burrata 3, mozzarella e ricotta 5, insalate ed erbe 3, frutti di bosco 2, pane 2…). Conserve, surgelati, salumi
+  stagionati e reparti dispensa/surgelati non danno consigli. Se il pasto è più in là della durata:
+  congelabile → "in congelatore appena torni dalla spesa" e "dal congelatore al frigo la sera prima" (pane e frutti di
+  bosco: la mattina stessa); non congelabile → "da comprare più vicino al giorno" (cozze e vongole: "o surgelate").
+  I consigli si vedono prima di mettere in lista e, dal giorno della spesa, nel riquadro "Da fare oggi" della Settimana,
+  dove un tocco li segna come fatti (condiviso tra i telefoni). Senza notifiche finché non c'è l'APK.
+- La lista e il piano usano lo stesso meccanismo di salvataggio (`sincronizzato.ts`): operazioni in coda, offline,
+  riapplicate sull'ultima versione di GitHub. I pasti di più di 60 giorni fa si tolgono dal file.
+
 ## Rimandato
-Ricette solo parlate senza sottotitoli (Whisper), testo in sovrimpressione nei video, dispensa, pianificazione dei pasti,
-notifiche (con l'APK), liste multiple, valori nutrizionali.
+Ricette solo parlate senza sottotitoli (Whisper), testo in sovrimpressione nei video, dispensa,
+notifiche (con l'APK), liste multiple, valori nutrizionali, carrello della spesa online Conad (idea: Claude in Chrome
+che riempie il carrello dalla lista, da provare a mano prima di scrivere codice).
 
 ## Tappe
 1. Repo, app di base installabile, menu Condividi, configurazione del token.
@@ -113,6 +134,7 @@ notifiche (con l'APK), liste multiple, valori nutrizionali.
 5. (9/11) Provata sul telefono vero da Edoardo: installazione e menu Condividi funzionano. Poi import bloccati e
    modalità cucina.
 6. (9/11) Foto vostre: foto del piatto nelle ricette e sezione "Ci piace" con i prodotti da ricordare.
+7. (13/11) Settimana: piano dei pasti, spesa per un periodo, consigli su congelatore e freschi.
 
 ## Formato dei dati
 
@@ -193,5 +215,27 @@ Una voce aggiunta da "Ci piace" ha in più `"foto": "foto/<id>.jpg"` e la `nota`
   "modificato_il": "2026-11-09T18:00:00Z"
 }
 ```
+
+`piano/pasti.json`
+```json
+{
+  "pasti": [
+    {
+      "id": "mh8k2x-4f9a",
+      "data": "2026-11-18",
+      "momento": "cena",
+      "ricetta": "salmone-ab12",
+      "titolo": "Salmone in crosta di pistacchi",
+      "porzioni": 2,
+      "spesa_il": "2026-11-14",
+      "fatti": ["congela:filetto di salmone"],
+      "aggiunto_da": "Edoardo"
+    }
+  ],
+  "aggiornato_il": "2026-11-13T18:00:00Z",
+  "ops_applicate": ["mh8k2x-4f9a"]
+}
+```
+`momento`: colazione, pranzo o cena. Un pasto scritto a mano ha `ricetta: null` e `porzioni: null`.
 
 `config.json`: `{ "reparti": ["frutta e verdura", "carne e pesce", "latticini e uova", "pane e forno", "dispensa", "surgelati", "bevande", "casa e igiene", "altro"] }`

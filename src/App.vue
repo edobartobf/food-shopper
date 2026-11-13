@@ -14,14 +14,14 @@ import { RouterLink, RouterView } from 'vue-router'
       <RouterLink to="/importa" class="scheda">
         <span class="icona" aria-hidden="true">＋</span><span>Importa</span>
       </RouterLink>
+      <RouterLink to="/settimana" class="scheda">
+        <span class="icona" aria-hidden="true">📅</span><span>Settimana</span>
+      </RouterLink>
       <RouterLink to="/spesa" class="scheda">
         <span class="icona" aria-hidden="true">🛒</span><span>Spesa</span>
       </RouterLink>
       <RouterLink to="/preferiti" class="scheda">
         <span class="icona" aria-hidden="true">♥</span><span>Ci piace</span>
-      </RouterLink>
-      <RouterLink to="/impostazioni" class="scheda">
-        <span class="icona" aria-hidden="true">⚙</span><span>Impostazioni</span>
       </RouterLink>
     </nav>
   </div>

@@ -207,6 +207,12 @@ async function elimina() {
 
     <div class="azioni" style="margin-top: 0">
       <button :disabled="!ricetta.ingredienti.length" @click="aggiungiAllaSpesa">🛒 Aggiungi alla spesa ({{ porzioni }} porz.)</button>
+      <RouterLink
+        :to="{ path: '/settimana/aggiungi', query: { ricetta: ricetta.id, porzioni: String(porzioni) } }"
+        class="pulsante-link secondario"
+      >
+        📅 Mettila in settimana
+      </RouterLink>
     </div>
     <div v-if="aggiunta" class="messaggio ok">
       Ingredienti aggiunti alla lista. <RouterLink to="/spesa">Apri la spesa</RouterLink>

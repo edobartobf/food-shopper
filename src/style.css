@@ -770,3 +770,171 @@ img.ingrandibile {
   max-height: 320px;
   display: block;
 }
+
+/* --- settimana --- */
+button.link {
+  background: none;
+  color: var(--primario);
+  padding: 0;
+  min-height: 0;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.giorno h2 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.giorno.oggi {
+  border-color: var(--primario);
+}
+
+.momento {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.momento + .momento {
+  border-top: 1px solid var(--bordo);
+}
+
+.nome-momento {
+  flex: none;
+  width: 76px;
+  padding-top: 8px;
+  font-size: 13px;
+  color: var(--testo-tenue);
+}
+
+.pasti {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pasto {
+  display: block;
+  width: 100%;
+  text-align: left;
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--primario-tenue);
+  color: var(--testo);
+  font-weight: 400;
+}
+
+.pasto.libero {
+  background: transparent;
+  border: 1px dashed var(--bordo);
+}
+
+.pasto.aperto {
+  outline: 2px solid var(--primario);
+}
+
+.pasto .titolo-voce {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.dettagli-pasto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 13px;
+  color: var(--testo-tenue);
+}
+
+.dettagli-pasto:empty {
+  display: none;
+}
+
+.in-lista {
+  color: var(--primario);
+  font-weight: 600;
+}
+
+.modifica-pasto {
+  padding: 10px 0 4px;
+}
+
+.modifica-pasto .riga-campi {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+}
+
+.modifica-pasto .riga-campi input,
+.modifica-pasto .riga-campi select {
+  min-width: 0;
+}
+
+.modifica-pasto .riga-campi label {
+  margin-top: 10px;
+}
+
+.aggiungi-momenti {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+}
+
+.aggiungi-momenti .chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  color: var(--testo-tenue);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.giorno .momento + .aggiungi-momenti {
+  border-top: 1px solid var(--bordo);
+}
+
+.da-fare {
+  margin-top: 12px;
+  border-color: var(--avviso);
+  background: var(--avviso-sfondo);
+}
+
+.da-fare h2 {
+  margin: 0 0 6px;
+  color: var(--avviso);
+}
+
+.da-fare .spunta-voce,
+.da-fare .tenue,
+.da-fare .titolo-voce {
+  color: var(--testo);
+}
+
+.consiglio {
+  padding: 6px 0;
+}
+
+.elenco-scelta {
+  display: flex;
+  flex-direction: column;
+  max-height: 46vh;
+  overflow-y: auto;
+}
+
+.riga-ricetta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--superficie);
+  color: var(--testo);
+  font-weight: 400;
+}
+
+.da-fare .spunta-voce {
+  width: 100%;
+  padding-left: 0;
+}
