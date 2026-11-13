@@ -938,3 +938,17 @@ button.link {
   width: 100%;
   padding-left: 0;
 }
+
+/* voce che nel negozio Conad online non c'è: si prende a parte */
+.non-conad {
+  display: table;
+  margin-top: 3px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--avviso-sfondo);
+  color: var(--avviso);
+  font-size: 0.78em;
+  font-weight: 600;
+  white-space: nowrap;
+  vertical-align: 1px;
+}

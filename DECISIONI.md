@@ -121,10 +121,24 @@ scritta a mano ("pizza fuori", "avanzi") che serve solo a ricordare. Si apre dal
 - La lista e il piano usano lo stesso meccanismo di salvataggio (`sincronizzato.ts`): operazioni in coda, offline,
   riapplicate sull'ultima versione di GitHub. I pasti di più di 60 giorni fa si tolgono dal file.
 
+## Carrello Conad (13/11)
+- Prova a mano il 13/11 con 3 ricette: 15 prodotti su 16 trovati (manca il latte di cocco), 32 € nel Superstore di
+  via Don Morisi (ritiro). Circa 12 minuti, di cui 4 per riempire il carrello una volta scelti i prodotti.
+- Niente API pubblica: lo fa **Claude in Chrome** con la skill di progetto `.claude/skills/carrello-conad` (istruzioni
+  + `conad.py`). Si lancia da una sessione Claude su edo-dev, con il Chrome di edo-dev collegato all'estensione
+  (stesso account Claude dell'app). Claude non conferma l'ordine, non prenota la fascia e non paga.
+- Le scelte si ricordano in `conad/abbinamenti.json` nel repo dati (voce della lista → prodotto Conad con link,
+  confezione, nota), più le voci che online non ci sono. Dalla seconda spesa Claude sceglie solo le voci nuove.
+- Regola di scelta: marca Conad o prezzo al kg più basso tra prodotti normali; la nota della voce vince.
+- Nell'app l'unico segno è "non su Conad online" in lista, per sapere cosa prendere a parte.
+- Cose viste: spesa minima 40 € (sotto c'è un supplemento); i freschi a peso hanno un minimo (salmone 600 g) e
+  incrementi di 100 g; il server a volte risponde 503 ma il prodotto entra lo stesso; il motore di ricerca confonde
+  parole simili ("tubetti" → "cubetti").
+
 ## Rimandato
 Ricette solo parlate senza sottotitoli (Whisper), testo in sovrimpressione nei video, dispensa,
-notifiche (con l'APK), liste multiple, valori nutrizionali, carrello della spesa online Conad (idea: Claude in Chrome
-che riempie il carrello dalla lista, da provare a mano prima di scrivere codice).
+notifiche (con l'APK), liste multiple, valori nutrizionali. Carrello Conad lanciato dal telefono (oggi serve il
+computer con Chrome).
 
 ## Tappe
 1. Repo, app di base installabile, menu Condividi, configurazione del token.
@@ -135,6 +149,7 @@ che riempie il carrello dalla lista, da provare a mano prima di scrivere codice)
    modalità cucina.
 6. (9/11) Foto vostre: foto del piatto nelle ricette e sezione "Ci piace" con i prodotti da ricordare.
 7. (13/11) Settimana: piano dei pasti, spesa per un periodo, consigli su congelatore e freschi.
+8. (13/11) Carrello Conad: prova a mano riuscita, poi skill con abbinamenti ricordati.
 
 ## Formato dei dati
 
@@ -237,5 +252,20 @@ Una voce aggiunta da "Ci piace" ha in più `"foto": "foto/<id>.jpg"` e la `nota`
 }
 ```
 `momento`: colazione, pranzo o cena. Un pasto scritto a mano ha `ricetta: null` e `porzioni: null`.
+
+`conad/abbinamenti.json` (lo scrive Claude con `conad.py ricorda`; chiavi come `chiave()` di `lista.ts`)
+```json
+{
+  "negozio": "Conad Superstore, via Don G. Morisi 3, Piacenza — Ordina e ritira",
+  "regola": "Marca Conad o il prezzo al kg più basso…",
+  "abbinamenti": {
+    "filetto di salmone": { "nome": "filetto di salmone", "prodotto": "FILETTO DI SALMONE FRESCO ALLEVATO NORVEGIA",
+      "url": "/p/filetto-di-salmone-fresco-allevato-norvegia--V_738190_C", "confezione": "minimo 600 g, poi +100 g",
+      "peso_variabile": true, "nota": "facoltativa", "scelto_il": "2026-11-13" }
+  },
+  "non_online": { "latte di cocco": { "nome": "latte di cocco", "visto_il": "2026-11-13" } },
+  "aggiornato_il": "2026-11-13T11:50:00+00:00"
+}
+```
 
 `config.json`: `{ "reparti": ["frutta e verdura", "carne e pesce", "latticini e uova", "pane e forno", "dispensa", "surgelati", "bevande", "casa e igiene", "altro"] }`

@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import FotoRepo from '../components/FotoRepo.vue'
+import { aggiornaConad, nonSuConad } from '../lib/conad'
 import { preparaOffline } from '../lib/foto'
 import { aggiornaPreferiti, preferitoPerNome, preferiti, voceDaPreferito } from '../lib/preferiti'
 import { CARRELLO, chiave, DISPENSA, formattaQuantitaVoce, leggiQuantita, leggiVoceLibera, raggruppa, testoDaCondividere, type Voce } from '../lib/lista'
@@ -20,6 +21,7 @@ onMounted(async () => {
   ferma = avviaControllo()
   if (!ricettario.caricato) void aggiornaRicettario()
   if (!preferiti.caricato) void aggiornaPreferiti()
+  void aggiornaConad()
   // le foto dei prodotti in lista servono proprio al supermercato, dove spesso non c'è campo
   void preparaOffline(vista.value.voci.map((v) => v.foto).filter((f): f is string => !!f))
 })
@@ -153,6 +155,7 @@ async function condividi() {
             <span class="nome-voce">
               {{ v.nome }}
               <span v-if="v.nota" class="tenue"> · {{ v.nota }}</span>
+              <span v-if="!v.spuntata && nonSuConad(v.nome)" class="non-conad">non su Conad online</span>
             </span>
             <span class="quantita">{{ g.titolo === DISPENSA ? '' : formattaQuantitaVoce(v) }}</span>
           </button>
